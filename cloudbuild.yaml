@@ -1,12 +1,12 @@
+# This file configures the build for the BACKEND service.
 steps:
   # This step uses the gcloud command-line tool to build and push the image.
-  # This is a more robust method than calling docker directly.
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Build and Push Backend'
     args:
       - 'builds'
       - 'submit'
-      - './backend'
+      - './backend' # Specifies the backend directory
       - '--tag=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-backend-service:${COMMIT_SHA}'
 
 # This specifies the final image that Cloud Run will use for deployment.
