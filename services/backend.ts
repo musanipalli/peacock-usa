@@ -1,0 +1,106 @@
+import { Product, Review, User, UserType, Order, ShippingDetails, CartItem } from '../types';
+
+// In a real production app, you would set this to your deployed backend's URL.
+// After deploying the backend to Cloud Run using the instructions in `backend/README.md`,
+// replace '/api' with the full Service URL provided by Cloud Run.
+// e.g., const API_BASE_URL = 'https://peacock-backend-service-a1b2c3d4e5-uc.a.run.app';
+const API_BASE_URL = '/api';
+
+const handleResponse = async <T>(response: Response): Promise<T> => {
+    if (!response.ok) {
+        // Try to parse the error as JSON, but fall back to plain text if that fails.
+        let error;
+        try {
+            error = await response.json();
+        } catch (e) {
+            error = { message: await response.text() };
+        }
+        throw new Error(error.message || 'An error occurred with the API request.');
+    }
+    // Handle cases where the response might be empty (e.g., a 204 No Content)
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
+};
+
+
+const api = {
+    get: async <T>(endpoint: string): Promise<T> => {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`);
+        return handleResponse<T>(response);
+    },
+    post: async <T>(endpoint: string, body: any): Promise<T> => {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        return handleResponse<T>(response);
+    },
+    put: async <T>(endpoint: string, body: any): Promise<T> => {
+         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        return handleResponse<T>(response);
+    },
+    delete: async <T>(endpoint: string): Promise<T> => {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'DELETE',
+        });
+        return handleResponse<T>(response);
+    }
+};
+
+class BackendService {
+    // --- User Management ---
+    async signupUser(user: Omit<User, 'phoneNumber'>, userType: UserType): Promise<{ success: boolean; message: string }> {
+        return api.post('/signup', { user, userType });
+    }
+
+    async loginUser(email: string, password: string, userType: UserType): Promise<{ success: boolean; user?: User; message?: string }> {
+        return api.post('/login', { email, password, userType });
+    }
+
+    async updateUser(email: string, updatedDetails: Partial<User>): Promise<User | null> {
+        return api.put(`/users/${encodeURIComponent(email)}`, updatedDetails);
+    }
+
+    // --- Product Management ---
+    async getProducts(): Promise<Product[]> {
+        return api.get<Product[]>('/products');
+    }
+
+    async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {
+        return api.post<Product>('/products', productData);
+    }
+
+    async updateProduct(updatedProduct: Product): Promise<Product | null> {
+        return api.put<Product>(`/products/${updatedProduct.id}`, updatedProduct);
+    }
+
+    async deleteProduct(productId: number): Promise<boolean> {
+        const result = await api.delete<{ success: boolean }>(`/products/${productId}`);
+        return result.success;
+    }
+
+    // --- Review Management ---
+    async getReviews(): Promise<Review[]> {
+        return api.get<Review[]>('/reviews');
+    }
+
+    async addReview(reviewData: Omit<Review, 'id'>): Promise<Review> {
+        return api.post<Review>('/reviews', reviewData);
+    }
+
+    // --- Order Management ---
+    async addOrder(userEmail: string, items: CartItem[], total: number, shippingDetails: ShippingDetails): Promise<Order> {
+        return api.post<Order>('/orders', { userEmail, items, total, shippingDetails });
+    }
+
+    async getOrdersForUser(userEmail: string): Promise<Order[]> {
+        return api.get<Order[]>(`/orders/${encodeURIComponent(userEmail)}`);
+    }
+}
+
+export const backend = new BackendService();
