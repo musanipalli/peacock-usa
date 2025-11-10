@@ -5,7 +5,7 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-usa/peacock:${COMMIT_SHA}'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
     - '.' # Build from the root directory
     - '-f'
     - 'Dockerfile.frontend' # Use the frontend-specific Dockerfile
@@ -14,10 +14,10 @@ steps:
   id: 'Push Frontend'
   args:
     - 'push'
-    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-usa/peacock:${COMMIT_SHA}'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
 
 images:
-  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-usa/peacock:${COMMIT_SHA}'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
