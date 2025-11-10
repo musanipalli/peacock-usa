@@ -7,11 +7,11 @@ steps:
       - 'builds'
       - 'submit'
       - './backend'
-      - '--tag=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-usa/peacock:${COMMIT_SHA}'
+      - '--tag=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-backend-service:${COMMIT_SHA}'
 
 # This specifies the final image that Cloud Run will use for deployment.
 images:
-  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-usa/peacock:${COMMIT_SHA}'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-backend-service:${COMMIT_SHA}'
 
 options:
   logging: CLOUD_LOGGING_ONLY

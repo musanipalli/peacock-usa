@@ -4,7 +4,7 @@ import { Product, Review, User, UserType, Order, ShippingDetails, CartItem } fro
 // After deploying the backend to Cloud Run, you will get a "Service URL".
 // Paste that URL here. It should look like:
 // 'https://peacock-backend-service-a1b2c3d4e5-uc.a.run.app/api'
-const API_BASE_URL = '[YOUR_DEPLOYED_BACKEND_URL]/api';
+const API_BASE_URL = 'https://peacock-backend-service-806651932334.europe-west1.run.app/api';
 
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
