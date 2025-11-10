@@ -1,25 +1,17 @@
 steps:
-  # This step builds the Docker image.
-  # It tells Docker to look in the './backend' directory for the Dockerfile and source code.
-  - name: 'gcr.io/cloud-builders/docker'
+  # This step uses the gcloud command-line tool to build and push the image.
+  # This is a more robust method than calling docker directly.
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'Build and Push Backend'
     args:
-      - 'build'
-      - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - 'builds'
+      - 'submit'
       - './backend'
-    id: 'Build'
+      - '--tag=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-backend-service:${COMMIT_SHA}'
 
-  # This step pushes the built image to Google Artifact Registry.
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
-    id: 'Push'
-
-# This specifies the final image that Cloud Run will deploy.
+# This specifies the final image that Cloud Run will use for deployment.
 images:
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-backend-service:${COMMIT_SHA}'
 
-# Add logging option to resolve build trigger error.
 options:
   logging: CLOUD_LOGGING_ONLY
