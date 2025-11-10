@@ -7,18 +7,28 @@ import { Product, Review, User, UserType, Order, ShippingDetails, CartItem } fro
 const API_BASE_URL = '/api';
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
-    if (!response.ok) {
-        // Try to parse the error as JSON, but fall back to plain text if that fails.
-        let error;
-        try {
-            error = await response.json();
-        } catch (e) {
-            error = { message: await response.text() };
-        }
-        throw new Error(error.message || 'An error occurred with the API request.');
+    // For successful responses with no content (e.g., DELETE returning 204).
+    if (response.status === 204) {
+        return null as T;
     }
-    // Handle cases where the response might be empty (e.g., a 204 No Content)
+
+    // Read the body as text ONCE. This is safe and prevents the "body already read" error.
     const text = await response.text();
+
+    if (!response.ok) {
+        let errorMessage;
+        try {
+            // Try to parse the text as a structured JSON error.
+            const errorJson = JSON.parse(text);
+            errorMessage = errorJson.message;
+        } catch (e) {
+            // If parsing fails, the raw text itself is the error message.
+            errorMessage = text;
+        }
+        throw new Error(errorMessage || `Request failed with status ${response.status}`);
+    }
+
+    // For successful responses, parse the text. An empty body will return null.
     return text ? JSON.parse(text) : null;
 };
 
@@ -81,7 +91,7 @@ class BackendService {
 
     async deleteProduct(productId: number): Promise<boolean> {
         const result = await api.delete<{ success: boolean }>(`/products/${productId}`);
-        return result.success;
+        return result ? result.success : true;
     }
 
     // --- Review Management ---
