@@ -1,10 +1,11 @@
 import { Product, Review, User, UserType, Order, ShippingDetails, CartItem } from '../types';
 
-// In a real production app, you would set this to your deployed backend's URL.
-// After deploying the backend to Cloud Run using the instructions in `backend/README.md`,
-// replace '/api' with the full Service URL provided by Cloud Run.
-// e.g., const API_BASE_URL = 'https://peacock-backend-service-a1b2c3d4e5-uc.a.run.app';
-const API_BASE_URL = '/api';
+// 🛑 ACTION REQUIRED: Replace this placeholder with your actual deployed backend URL.
+// After deploying the backend to Cloud Run, you will get a "Service URL".
+// Paste that URL here. It should look like:
+// 'https://peacock-backend-service-a1b2c3d4e5-uc.a.run.app/api'
+const API_BASE_URL = '[YOUR_DEPLOYED_BACKEND_URL]/api';
+
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
     // For successful responses with no content (e.g., DELETE returning 204).
@@ -35,10 +36,16 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 
 const api = {
     get: async <T>(endpoint: string): Promise<T> => {
+        if (API_BASE_URL.startsWith('[')) {
+            throw new Error('Backend URL has not been configured in services/backend.ts');
+        }
         const response = await fetch(`${API_BASE_URL}${endpoint}`);
         return handleResponse<T>(response);
     },
     post: async <T>(endpoint: string, body: any): Promise<T> => {
+        if (API_BASE_URL.startsWith('[')) {
+            throw new Error('Backend URL has not been configured in services/backend.ts');
+        }
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -47,6 +54,9 @@ const api = {
         return handleResponse<T>(response);
     },
     put: async <T>(endpoint: string, body: any): Promise<T> => {
+         if (API_BASE_URL.startsWith('[')) {
+            throw new Error('Backend URL has not been configured in services/backend.ts');
+        }
          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -55,6 +65,9 @@ const api = {
         return handleResponse<T>(response);
     },
     delete: async <T>(endpoint: string): Promise<T> => {
+        if (API_BASE_URL.startsWith('[')) {
+            throw new Error('Backend URL has not been configured in services/backend.ts');
+        }
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'DELETE',
         });

@@ -87,6 +87,12 @@ const initializeDb = async () => {
 };
 
 // --- API Endpoints ---
+
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.status(200).send('Peacock Backend is running!');
+});
+
 const apiRouter = express.Router();
 
 // User Endpoints
@@ -279,10 +285,17 @@ app.use('/api', apiRouter);
 // Start server
 app.listen(port, async () => {
     try {
+        console.log('Attempting to initialize database connection...');
         await initializeDb();
         console.log(`Server listening on port ${port}`);
     } catch (err) {
-        console.error('Failed to start server:', err);
+        console.error('--- FATAL: FAILED TO INITIALIZE DATABASE ---');
+        console.error('This is likely due to incorrect environment variables or IAM permissions.');
+        console.error('Please check the following in your Cloud Run service configuration:');
+        console.error('1. The "Cloud SQL connections" setting is configured with the correct instance connection name.');
+        console.error('2. The service account has the "Cloud SQL Client" role.');
+        console.error('3. The DB_USER, DB_PASSWORD, DB_NAME, and INSTANCE_CONNECTION_NAME environment variables are set correctly.');
+        console.error('Original Error:', err);
         process.exit(1);
     }
 });
