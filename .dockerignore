@@ -1,0 +1,18 @@
+# Ignore Node.js dependency directory
+node_modules
+
+# Ignore build output directory
+dist
+
+# Ignore backend-specific code and configurations
+backend/
+cloudbuild.yaml
+backend-*.json
+
+# Ignore Git directory and local environment files
+.git
+.env.*
+*.local
+
+# Ignore IDE/editor configuration files
+.vscode/
