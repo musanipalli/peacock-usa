@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-=======
+
 # Use an official lightweight Node.js runtime as a parent image
 FROM node:18-slim
 
@@ -21,4 +20,4 @@ EXPOSE 8080
 
 # Define the command to run your application when the container starts
 CMD ["node", "server.js"]
->>>>>>> ec81277 ( adding dockerfile)
+
