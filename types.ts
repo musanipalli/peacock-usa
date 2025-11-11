@@ -53,7 +53,7 @@ export interface ShippingDetails {
 export interface User {
   name: string;
   email: string;
-  password: string; // In a real app, this would be a hash
+  password?: string; // In a real app, this would be a hash
   phoneNumber?: string;
 }
 

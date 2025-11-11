@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { User, UserType } from '../types';
+import { backend } from '../services/backend';
 
 interface ProfileProps {
     user: User;
     userType: UserType;
-    onUpdateProfile: (updatedUser: User) => void;
+    onUpdateProfile: (updatedUser: Omit<User, 'password' | 'email'>) => void;
     onBack: () => void;
 }
 
@@ -21,19 +22,14 @@ export const Profile: React.FC<ProfileProps> = ({ user, userType, onUpdateProfil
 
     const handleProfileUpdate = (e: React.FormEvent) => {
         e.preventDefault();
-        const updatedUser = { ...user, name, email, phoneNumber };
-        onUpdateProfile(updatedUser);
+        onUpdateProfile({ name, phoneNumber });
     };
 
-    const handlePasswordChange = (e: React.FormEvent) => {
+    const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         setPasswordError('');
         setPasswordSuccess('');
 
-        if (currentPassword !== user.password) {
-            setPasswordError('Current password is not correct.');
-            return;
-        }
         if (newPassword.length < 6) {
             setPasswordError('New password must be at least 6 characters long.');
             return;
@@ -43,11 +39,19 @@ export const Profile: React.FC<ProfileProps> = ({ user, userType, onUpdateProfil
             return;
         }
 
-        onUpdateProfile({ ...user, password: newPassword });
-        setPasswordSuccess('Password updated successfully!');
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
+        try {
+            const result = await backend.changePassword(user.email, currentPassword, newPassword);
+            if (result.success) {
+                setPasswordSuccess(result.message);
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                setPasswordError(result.message || 'An unknown error occurred.');
+            }
+        } catch (err: any) {
+             setPasswordError(err.message || 'Failed to update password.');
+        }
     };
 
     return (
@@ -67,7 +71,7 @@ export const Profile: React.FC<ProfileProps> = ({ user, userType, onUpdateProfil
                             </div>
                              <div>
                                 <label className="text-sm font-medium text-gray-700">Email Address</label>
-                                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 mt-1 border rounded-md" />
+                                <input type="email" value={email} readOnly disabled className="w-full p-2 mt-1 border rounded-md bg-gray-100 cursor-not-allowed" />
                             </div>
                              <div>
                                 <label className="text-sm font-medium text-gray-700">Phone Number</label>

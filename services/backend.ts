@@ -85,8 +85,12 @@ class BackendService {
         return api.post('/login', { email, password, userType });
     }
 
-    async updateUser(email: string, updatedDetails: Partial<User>): Promise<User | null> {
+    async updateUser(email: string, updatedDetails: Partial<Omit<User, 'password' | 'email'>>): Promise<User | null> {
         return api.put(`/users/${encodeURIComponent(email)}`, updatedDetails);
+    }
+
+    async changePassword(email: string, currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+        return api.post('/change-password', { email, currentPassword, newPassword });
     }
 
     // --- Product Management ---

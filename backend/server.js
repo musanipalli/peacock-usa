@@ -2,20 +2,20 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = process.env.PORT || 8080;
+const saltRounds = 10;
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' })); // Increase limit for base64 images
 
 // --- Database Connection ---
-// This configuration uses environment variables that will be set by Cloud Run
-// when connecting to a Cloud SQL instance.
 const pool = new Pool({
-  user: process.env.DB_USER, // e.g., 'postgres'
-  host: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`, // e.g., '/cloudsql/project:region:instance'
-  database: process.env.DB_NAME, // e.g., 'peacock_store'
+  user: process.env.DB_USER,
+  host: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
+  database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: 5432,
 });
@@ -26,7 +26,6 @@ const initializeDb = async () => {
     try {
         await client.query('BEGIN');
         
-        // Create tables if they don't exist
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -88,7 +87,6 @@ const initializeDb = async () => {
 
 // --- API Endpoints ---
 
-// Health check endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Peacock Backend is running!');
 });
@@ -101,16 +99,19 @@ apiRouter.post('/signup', async (req, res) => {
     try {
         const existing = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [user.email, userType]);
         if (existing.rows.length > 0) {
-            return res.status(409).json({ success: false, message: `A ${userType} account with this email already exists.` });
+            return res.status(409).send(`A ${userType} account with this email already exists.`);
         }
+        
+        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+        
         await pool.query(
             'INSERT INTO users (name, email, password, user_type, phone_number) VALUES ($1, $2, $3, $4, $5)',
-            [user.name, user.email, user.password, userType, '']
+            [user.name, user.email, hashedPassword, userType, '']
         );
         res.status(201).json({ success: true, message: 'Account created successfully! Please log in.' });
     } catch (err) {
         console.error('Signup Error:', err);
-        res.status(500).json({ success: false, message: 'Server error during signup.' });
+        res.status(500).send('Server error during signup.');
     }
 });
 
@@ -119,43 +120,80 @@ apiRouter.post('/login', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [email, userType]);
         const foundUser = result.rows[0];
-        if (foundUser && foundUser.password === password) {
-             const userResponse = {
-                name: foundUser.name,
-                email: foundUser.email,
-                password: foundUser.password, // In real-world, never send password back.
-                phoneNumber: foundUser.phone_number
-            };
-            res.json({ success: true, user: userResponse });
-        } else {
-            res.status(401).json({ success: false, message: 'Invalid email or password.' });
+
+        if (foundUser) {
+            const match = await bcrypt.compare(password, foundUser.password);
+            if (match) {
+                const userResponse = {
+                    name: foundUser.name,
+                    email: foundUser.email,
+                    phoneNumber: foundUser.phone_number
+                };
+                return res.json({ success: true, user: userResponse });
+            }
         }
+        
+        res.status(401).send('Invalid email or password.');
     } catch (err) {
         console.error('Login Error:', err);
-        res.status(500).json({ success: false, message: 'Server error during login.' });
+        res.status(500).send('Server error during login.');
     }
 });
 
 apiRouter.put('/users/:email', async (req, res) => {
     const { email } = req.params;
-    const { name, phoneNumber, password } = req.body;
+    const { name, phoneNumber } = req.body;
     try {
         const result = await pool.query(
-            'UPDATE users SET name = $1, phone_number = $2, password = $3 WHERE email = $4 RETURNING *',
-            [name, phoneNumber, password, email]
+            'UPDATE users SET name = $1, phone_number = $2 WHERE email = $3 RETURNING *',
+            [name, phoneNumber, email]
         );
-        res.json(result.rows[0]);
+        const updatedUser = result.rows[0];
+        if (updatedUser) {
+            res.json({
+                name: updatedUser.name,
+                email: updatedUser.email,
+                phoneNumber: updatedUser.phone_number,
+            });
+        } else {
+            res.status(404).send('User not found');
+        }
     } catch (err) {
         console.error('Update User Error:', err);
-        res.status(500).json({ message: 'Failed to update user' });
+        res.status(500).send('Failed to update user');
     }
 });
+
+apiRouter.post('/change-password', async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+
+        const match = await bcrypt.compare(currentPassword, user.password);
+        if (!match) {
+            return res.status(401).send('Current password is not correct.');
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+        await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedNewPassword, email]);
+
+        res.json({ success: true, message: 'Password updated successfully!' });
+    } catch (err) {
+        console.error('Change Password Error:', err);
+        res.status(500).send('Server error during password change.');
+    }
+});
+
 
 // Product Endpoints
 apiRouter.get('/products', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM products ORDER BY id');
-        // Convert snake_case from DB to camelCase for frontend
         const products = result.rows.map(p => ({
             id: p.id,
             name: p.name,
@@ -169,7 +207,7 @@ apiRouter.get('/products', async (req, res) => {
         res.json(products);
     } catch (err) {
         console.error('Get Products Error:', err);
-        res.status(500).json({ message: 'Failed to fetch products' });
+        res.status(500).send('Failed to fetch products');
     }
 });
 
@@ -180,10 +218,20 @@ apiRouter.post('/products', async (req, res) => {
             'INSERT INTO products (name, category, description, image_urls, buy_price, rent_price, seller_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
             [name, category, description, imageUrls, buyPrice, rentPrice, sellerEmail]
         );
-        res.status(201).json(result.rows[0]);
+        const p = result.rows[0];
+         res.status(201).json({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            description: p.description,
+            imageUrls: p.image_urls,
+            buyPrice: parseFloat(p.buy_price),
+            rentPrice: parseFloat(p.rent_price),
+            sellerEmail: p.seller_email
+        });
     } catch (err) {
         console.error('Add Product Error:', err);
-        res.status(500).json({ message: 'Failed to add product' });
+        res.status(500).send('Failed to add product');
     }
 });
 
@@ -195,34 +243,54 @@ apiRouter.put('/products/:id', async (req, res) => {
             'UPDATE products SET name = $1, category = $2, description = $3, image_urls = $4, buy_price = $5, rent_price = $6 WHERE id = $7 RETURNING *',
             [name, category, description, imageUrls, buyPrice, rentPrice, id]
         );
-        res.json(result.rows[0]);
+        const p = result.rows[0];
+        res.json({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            description: p.description,
+            imageUrls: p.image_urls,
+            buyPrice: parseFloat(p.buy_price),
+            rentPrice: parseFloat(p.rent_price),
+            sellerEmail: p.seller_email
+        });
     } catch (err) {
         console.error('Update Product Error:', err);
-        res.status(500).json({ message: 'Failed to update product' });
+        res.status(500).send('Failed to update product');
     }
 });
 
 apiRouter.delete('/products/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        await pool.query('DELETE FROM products WHERE id = $1', [id]);
-        res.json({ success: true });
+        const result = await pool.query('DELETE FROM products WHERE id = $1', [id]);
+        if (result.rowCount > 0) {
+            res.status(200).json({ success: true });
+        } else {
+            res.status(404).send('Product not found');
+        }
     } catch (err) {
         console.error('Delete Product Error:', err);
-        res.status(500).json({ message: 'Failed to delete product' });
+        res.status(500).send('Failed to delete product');
     }
 });
-
 
 // Review Endpoints
 apiRouter.get('/reviews', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM reviews ORDER BY id');
-        const reviews = result.rows.map(r => ({ ...r, productId: r.product_id }));
+        const result = await pool.query('SELECT * FROM reviews ORDER BY id DESC');
+        const reviews = result.rows.map(r => ({
+            id: r.id,
+            productId: r.product_id,
+            author: r.author,
+            location: r.location,
+            text: r.text,
+            rating: r.rating
+        }));
         res.json(reviews);
     } catch (err) {
         console.error('Get Reviews Error:', err);
-        res.status(500).json({ message: 'Failed to fetch reviews' });
+        res.status(500).send('Failed to fetch reviews');
     }
 });
 
@@ -233,69 +301,74 @@ apiRouter.post('/reviews', async (req, res) => {
             'INSERT INTO reviews (product_id, author, location, text, rating) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [productId, author, location, text, rating]
         );
-        res.status(201).json(result.rows[0]);
+        const newReview = result.rows[0];
+        res.status(201).json({
+            id: newReview.id,
+            productId: newReview.product_id,
+            author: newReview.author,
+            location: newReview.location,
+            text: newReview.text,
+            rating: newReview.rating
+        });
     } catch (err) {
         console.error('Add Review Error:', err);
-        res.status(500).json({ message: 'Failed to add review' });
+        res.status(500).send('Failed to add review');
     }
 });
+
 
 // Order Endpoints
 apiRouter.post('/orders', async (req, res) => {
     const { userEmail, items, total, shippingDetails } = req.body;
-    const newOrder = {
-        id: `PEA-${Date.now()}`,
-        userEmail,
-        date: new Date(),
-        items,
-        total,
-        status: 'Processing',
-        shippingDetails,
-    };
+    const orderId = `PCK-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    const orderDate = new Date();
     try {
-        await pool.query(
-            'INSERT INTO orders (id, user_email, date, items, total, status, shipping_details) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [newOrder.id, newOrder.userEmail, newOrder.date, newOrder.items, newOrder.total, newOrder.status, newOrder.shippingDetails]
+        const result = await pool.query(
+            'INSERT INTO orders (id, user_email, date, items, total, status, shipping_details) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [orderId, userEmail, orderDate, items, total, 'Processing', shippingDetails]
         );
-        res.status(201).json(newOrder);
+        res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error('Create Order Error:', err);
-        res.status(500).json({ message: 'Failed to create order' });
+        console.error('Add Order Error:', err);
+        res.status(500).send('Failed to create order');
     }
 });
 
-apiRouter.get('/orders/:email', async (req, res) => {
+apiRouter.get('/orders/:userEmail', async (req, res) => {
+    const { userEmail } = req.params;
     try {
-        const result = await pool.query('SELECT * FROM orders WHERE user_email = $1 ORDER BY date DESC', [req.params.email]);
-        const orders = result.rows.map(o => ({
-            ...o,
-            userEmail: o.user_email,
-            trackingNumber: o.tracking_number,
-            shippingDetails: o.shipping_details
+        const result = await pool.query('SELECT * FROM orders WHERE user_email = $1 ORDER BY date DESC', [userEmail]);
+        const orders = result.rows.map(order => ({
+            id: order.id,
+            userEmail: order.user_email,
+            date: order.date,
+            items: order.items,
+            total: parseFloat(order.total),
+            status: order.status,
+            trackingNumber: order.tracking_number,
+            shippingDetails: order.shipping_details
         }));
         res.json(orders);
     } catch (err) {
         console.error('Get Orders Error:', err);
-        res.status(500).json({ message: 'Failed to fetch orders' });
+        res.status(500).send('Failed to fetch orders');
     }
 });
+
 
 app.use('/api', apiRouter);
 
-// Start server
-app.listen(port, async () => {
+// --- Server Start ---
+const startServer = async () => {
     try {
-        console.log('Attempting to initialize database connection...');
         await initializeDb();
-        console.log(`Server listening on port ${port}`);
+        app.listen(port, () => {
+            console.log(`Server listening on port ${port}`);
+        });
     } catch (err) {
-        console.error('--- FATAL: FAILED TO INITIALIZE DATABASE ---');
-        console.error('This is likely due to incorrect environment variables or IAM permissions.');
-        console.error('Please check the following in your Cloud Run service configuration:');
-        console.error('1. The "Cloud SQL connections" setting is configured with the correct instance connection name.');
-        console.error('2. The service account has the "Cloud SQL Client" role.');
-        console.error('3. The DB_USER, DB_PASSWORD, DB_NAME, and INSTANCE_CONNECTION_NAME environment variables are set correctly.');
-        console.error('Original Error:', err);
+        console.error('Failed to start server:', err);
         process.exit(1);
     }
-});
+};
+
+startServer();

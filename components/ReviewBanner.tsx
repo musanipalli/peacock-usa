@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Review } from '../types';
-import { REVIEWS } from '../constants';
 
 const StarIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
     <svg className={`w-5 h-5 ${filled ? 'text-peacock-marigold' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
@@ -9,24 +8,27 @@ const StarIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
 );
 
 
-export const ReviewBanner: React.FC = () => {
+export const ReviewBanner: React.FC<{reviews: Review[]}> = ({ reviews }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
+        if (reviews.length === 0) return;
         const timer = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % REVIEWS.length);
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
         }, 5000);
         return () => clearInterval(timer);
-    }, []);
+    }, [reviews.length]);
 
-    const currentReview = REVIEWS[currentIndex];
+    if (reviews.length === 0) {
+        return null;
+    }
 
     return (
         <section className="bg-peacock-emerald/10 py-16">
             <div className="container mx-auto px-4 text-center text-peacock-dark">
                 <h2 className="text-3xl font-bold font-serif text-center mb-10 text-peacock-dark">What Our Customers Say</h2>
                 <div className="relative overflow-hidden h-64 flex items-center justify-center">
-                    {REVIEWS.map((review, index) => (
+                    {reviews.map((review, index) => (
                         <div
                             key={review.id}
                             className={`absolute w-full transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}

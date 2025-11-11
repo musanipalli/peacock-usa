@@ -82,17 +82,17 @@ const App: React.FC = () => {
         showToast('You have been logged out.');
     };
     
-    const handleUpdateProfile = async (updatedUser: User) => {
+    const handleUpdateProfile = async (updatedUser: Omit<User, 'password' | 'email'>) => {
         if (!user) return;
         try {
             const result = await backend.updateUser(user.email, updatedUser);
             if (result) {
-                setUser(result);
+                setUser(prevUser => ({ ...prevUser, ...result }));
                 showToast('Profile updated successfully!');
                 setPage('home');
             }
-        } catch (err) {
-            showToast('Failed to update profile.');
+        } catch (err: any) {
+            showToast(err.message || 'Failed to update profile.');
         }
     };
     
@@ -228,7 +228,7 @@ const App: React.FC = () => {
                                 ))}
                             </div>
                         </main>
-                        <ReviewBanner />
+                        <ReviewBanner reviews={reviews} />
                     </>
                 );
         }
