@@ -1,20 +1,23 @@
+# Dependency directories
+node_modules/
 
-# Ignore Node.js dependency directory
-node_modules
+# Build output folder
+dist/
 
-# Ignore build output directory
-dist
-
-# Ignore backend-specific code and configurations
+# The entire backend is not needed to build the frontend
 backend/
-cloudbuild.yaml
-backend-*.json
 
-# Ignore Git directory and local environment files
+# Git and Docker config files
 .git
-.env.*
-*.local
+.gitignore
+Dockerfile*
+cloudbuild*.yaml
 
-# Ignore IDE/editor configuration files
+# IDE and OS-specific files
 .vscode/
+.idea/
+.DS_Store
+npm-debug.log*
 
+# Documentation
+README.md
