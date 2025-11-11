@@ -1,47 +1,23 @@
-# This file configures the build for the FRONTEND service with proper environment variables.
+# This file configures the build for the FRONTEND service.
 steps:
-# Build the frontend image with build arguments
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Build Frontend'
   args:
     - 'build'
     - '-t'
     - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
-    - '--build-arg'
-    - 'VITE_API_BASE_URL=https://peacock-backend-service-806651932334.europe-west1.run.app/api'
-    - '.'
+    - '.' # Build from the root directory
     - '-f'
-    - 'Dockerfile.frontend.fixed'
+    - 'Dockerfile.frontend' # Use the frontend-specific Dockerfile
 
-# Push the frontend image
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push Frontend'
   args:
     - 'push'
     - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
 
-# Deploy to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: 'Deploy to Cloud Run'
-  entrypoint: 'gcloud'
-  args:
-    - 'run'
-    - 'deploy'
-    - 'peacock-frontend'
-    - '--image=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
-    - '--region=europe-west1'
-    - '--platform=managed'
-    - '--allow-unauthenticated'
-    - '--port=80'
-    - '--memory=512Mi'
-    - '--cpu=1'
-    - '--timeout=300'
-    - '--concurrency=1000'
-    - '--max-instances=10'
-
 images:
   - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_8'
