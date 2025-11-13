@@ -138,3 +138,19 @@ const API_BASE_URL = 'https://peacock-backend-service-....run.app'; // Example U
 ```
 
 Your application is now fully deployed with a secure, scalable backend and database!
+
+---
+
+## Local development (optional)
+
+You can point the backend at any reachable PostgreSQL database instead of Cloud SQL sockets by exporting the following before running `npm start`:
+
+```
+export DB_USER=<db user>
+export DB_PASSWORD=<db password>
+export DB_NAME=<db name>
+export DB_HOST=<db host, e.g. localhost>
+# optionally: DB_PORT (defaults to 5432) or DB_SOCKET_PATH/INSTANCE_CONNECTION_NAME for Unix sockets
+```
+
+Once the database is reachable, `npm install && npm start` will boot the Express server locally on port 8080.

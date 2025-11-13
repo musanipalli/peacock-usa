@@ -12,12 +12,22 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' })); // Increase limit for base64 images
 
 // --- Database Connection ---
+const resolveDbHost = () => {
+  if (process.env.INSTANCE_CONNECTION_NAME) {
+    return `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
+  }
+  if (process.env.DB_SOCKET_PATH) {
+    return process.env.DB_SOCKET_PATH;
+  }
+  return process.env.DB_HOST || '127.0.0.1';
+};
+
 const pool = new Pool({
   user: process.env.DB_USER,
-  host: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
+  host: resolveDbHost(),
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
-  port: 5432,
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
 });
 
 // --- Database Initialization ---

@@ -15,6 +15,7 @@ import { Toast } from './components/Toast';
 import { Hero } from './components/Hero';
 import { Product, Review, CartItem, User, UserType, CartAction, Category, ShippingDetails } from './types';
 import { backend } from './services/backend';
+import { PRODUCTS as SAMPLE_PRODUCTS, REVIEWS as SAMPLE_REVIEWS } from './constants';
 
 type Page = 'home' | 'checkout' | 'orderHistory' | 'profile' | 'myProducts' | 'videoGenerator';
 
@@ -38,12 +39,31 @@ const App: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
     const [toast, setToast] = useState({ show: false, message: '' });
+    const [isOfflineMode, setIsOfflineMode] = useState(false);
+    const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
+
+    const showToast = useCallback((message: string) => {
+        setToast({ show: true, message });
+    }, []);
+
+    const loadSampleData = useCallback(() => {
+        setProducts(SAMPLE_PRODUCTS);
+        setReviews(SAMPLE_REVIEWS);
+    }, []);
+
+    const ensureOnline = useCallback(() => {
+        if (!isOfflineMode) return true;
+        showToast('This feature is unavailable while using sample data.');
+        return false;
+    }, [isOfflineMode, showToast]);
 
     // Data fetching
     const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
             setError(null);
+            setIsOfflineMode(false);
+            setConnectionWarning(null);
             const [productsData, reviewsData] = await Promise.all([
                 backend.getProducts(),
                 backend.getReviews()
@@ -51,23 +71,20 @@ const App: React.FC = () => {
             setProducts(productsData);
             setReviews(reviewsData);
         } catch (err: any) {
-            const errorMessage = 'Failed to fetch data. Please ensure the backend server is running and accessible.';
-            setError(errorMessage);
-            showToast(errorMessage);
+            const warningMessage = 'Unable to reach the backend. Showing sample catalog data instead.';
+            loadSampleData();
+            setIsOfflineMode(true);
+            setConnectionWarning(warningMessage);
+            showToast(warningMessage);
             console.error(err);
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [loadSampleData, showToast]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-
-    // Handlers
-    const showToast = (message: string) => {
-        setToast({ show: true, message });
-    };
 
     const handleLoginSuccess = (loggedInUser: User, type: UserType) => {
         setUser(loggedInUser);
@@ -84,6 +101,7 @@ const App: React.FC = () => {
     
     const handleUpdateProfile = async (updatedUser: Omit<User, 'password' | 'email'>) => {
         if (!user) return;
+        if (!ensureOnline()) return;
         try {
             const result = await backend.updateUser(user.email, updatedUser);
             if (result) {
@@ -126,6 +144,7 @@ const App: React.FC = () => {
 
     const handlePaymentSuccess = async (shippingDetails: ShippingDetails) => {
         if (!user) return;
+        if (!ensureOnline()) return;
         const total = cartItems.reduce((sum, item) => sum + (item.action === 'buy' ? item.product.buyPrice : item.product.rentPrice) * item.quantity, 0) * 1.08;
         try {
             await backend.addOrder(user.email, cartItems, total, shippingDetails);
@@ -141,6 +160,7 @@ const App: React.FC = () => {
             showToast('You must be logged in to leave a review.');
             return;
         }
+        if (!ensureOnline()) return;
         try {
             const newReview = await backend.addReview({
                 productId,
@@ -157,6 +177,7 @@ const App: React.FC = () => {
     };
 
     const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
+        if (!ensureOnline()) return;
         try {
             const newProduct = await backend.addProduct(productData);
             setProducts(prev => [...prev, newProduct]);
@@ -167,6 +188,7 @@ const App: React.FC = () => {
     };
     
     const handleUpdateProduct = async (updatedProduct: Product) => {
+        if (!ensureOnline()) return;
         try {
             const result = await backend.updateProduct(updatedProduct);
             if (result) {
@@ -179,7 +201,8 @@ const App: React.FC = () => {
     };
 
     const handleDeleteProduct = async (productId: number) => {
-         try {
+        if (!ensureOnline()) return;
+        try {
             const success = await backend.deleteProduct(productId);
             if (success) {
                 setProducts(prev => prev.filter(p => p.id !== productId));
@@ -256,7 +279,13 @@ const App: React.FC = () => {
                 onGoHome={() => { setPage('home'); setSelectedCategory(null); }}
                 onSelectCategory={(cat) => { setPage('home'); setSelectedCategory(cat); }}
             />
-            
+
+            {connectionWarning && (
+                <div className="max-w-3xl mx-auto bg-amber-50 border border-amber-200 text-amber-900 rounded-md px-4 py-3 mt-4">
+                    <p className="text-sm">{connectionWarning}</p>
+                </div>
+            )}
+
             {renderPage()}
             
             <LoginModal 
