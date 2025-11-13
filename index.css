@@ -7,9 +7,19 @@ html {
   scroll-behavior: smooth;
 }
 body {
+  background: radial-gradient(circle at top, #f7f5ec 0%, #fefdf8 35%, #f8f4ee 70%, #f3efe9 100%);
+  color: #0F172A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.peacock-sheen {
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 60%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.25) 0%, transparent 45%),
+    linear-gradient(135deg, rgba(244, 232, 186, 0.25), rgba(0, 168, 150, 0.25));
+}
+
 /* Custom scrollbar for a more polished look */
 ::-webkit-scrollbar {
   width: 8px;

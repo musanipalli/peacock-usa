@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <defs>
+    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF4BE"/>
+      <stop offset="50%" stop-color="#F5D77D"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" fill="#0f1e17"/>
+  <g opacity="0.35" fill="none" stroke="url(#goldStroke)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 10c12 42 12 88 0 140"/>
+    <path d="M80 35C60 55 30 65 10 60"/>
+    <path d="M80 55C52 75 32 90 18 110"/>
+    <path d="M80 80c-25 15-42 38-50 60"/>
+    <path d="M80 35c20 20 50 30 70 25"/>
+    <path d="M80 55c28 20 48 35 62 55"/>
+    <path d="M80 80c25 15 42 38 50 60"/>
+    <circle cx="80" cy="32" r="12"/>
+  </g>
+</svg>

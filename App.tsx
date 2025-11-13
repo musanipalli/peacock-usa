@@ -13,6 +13,7 @@ import { ReviewBanner } from './components/ReviewBanner';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { Toast } from './components/Toast';
 import { Hero } from './components/Hero';
+import { BrandShowcase } from './components/BrandShowcase';
 import { Product, Review, CartItem, User, UserType, CartAction, Category, ShippingDetails } from './types';
 import { backend } from './services/backend';
 import { PRODUCTS as SAMPLE_PRODUCTS, REVIEWS as SAMPLE_REVIEWS } from './constants';
@@ -233,6 +234,7 @@ const App: React.FC = () => {
                 return (
                     <>
                         <Hero />
+                        <BrandShowcase />
                         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                             <h2 className="text-3xl font-bold font-serif text-center mb-10 text-peacock-dark capitalize">
                                 {selectedCategory ? `${selectedCategory.replace('-', ' ')} Collection` : 'Featured Collection'}

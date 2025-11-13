@@ -19,6 +19,7 @@ export default {
       fontFamily: {
           sans: ['Inter', 'sans-serif'],
           serif: ['"Playfair Display"', 'serif'],
+          script: ['"Great Vibes"', 'cursive'],
       },
       keyframes: {
         'slide-in': {
