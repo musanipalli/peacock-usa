@@ -33,7 +33,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/14YOO7bv29JfT4MgL0T87hN
    gcloud sql connect peacock-db --user=postgres
    \i backend/seed.sql
    ```
-   The script wipes and repopulates `products`, `reviews`, `users`, and `orders` so `/api/*` endpoints return meaningful demo data (seed user passwords are `peacock123`).
+   The script creates the required tables if they do not exist, then wipes and repopulates `products`, `reviews`, `users`, and `orders` so `/api/*` endpoints return meaningful demo data (seed user passwords are `peacock123`).
 4. Start the frontend in another terminal:
    `npm run dev`
 

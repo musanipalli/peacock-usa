@@ -1,5 +1,46 @@
 BEGIN;
 
+-- Ensure tables exist (mirrors backend/server.js schema)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(50),
+    user_type VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    description TEXT,
+    image_urls TEXT[],
+    buy_price NUMERIC(10, 2) NOT NULL,
+    rent_price NUMERIC(10, 2) NOT NULL,
+    seller_email VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    author VARCHAR(255),
+    location VARCHAR(255),
+    text TEXT,
+    rating INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id VARCHAR(255) PRIMARY KEY,
+    user_email VARCHAR(255) NOT NULL,
+    date TIMESTAMPTZ NOT NULL,
+    items JSONB,
+    total NUMERIC(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    tracking_number VARCHAR(255),
+    shipping_details JSONB
+);
+
 TRUNCATE TABLE orders RESTART IDENTITY CASCADE;
 TRUNCATE TABLE reviews RESTART IDENTITY CASCADE;
 TRUNCATE TABLE products RESTART IDENTITY CASCADE;

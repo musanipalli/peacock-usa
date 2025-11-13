@@ -165,4 +165,4 @@ gcloud sql connect peacock-db --user=postgres
 \i backend/seed.sql
 ```
 
-Replace the instance/user as needed for your environment. The script truncates `products`, `reviews`, `users`, and `orders`, then repopulates them with the sample catalog. Seeded user passwords are `peacock123`, so you can immediately log in to the frontend with `priya@example.com` or `rohan@example.com`.
+Replace the instance/user as needed for your environment. The script creates the necessary tables if they’re missing, then truncates `products`, `reviews`, `users`, and `orders` before repopulating them with the sample catalog. Seeded user passwords are `peacock123`, so you can immediately log in to the frontend with `priya@example.com` or `rohan@example.com`.
