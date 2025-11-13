@@ -28,7 +28,8 @@ const resolveDbHost = () => {
   return process.env.DB_HOST || '127.0.0.1';
 };
 
-const isDbConfigured = process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME;
+const isMockMode = process.env.MOCK_MODE === 'true';
+const isDbConfigured = !isMockMode && process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME;
 
 const pool = isDbConfigured ? new Pool({
   user: process.env.DB_USER,
@@ -39,7 +40,10 @@ const pool = isDbConfigured ? new Pool({
 }) : null;
 
 if (!isDbConfigured) {
-    console.warn('Database environment variables were not found. The backend will run in mock mode using in-memory sample data.');
+    const reason = isMockMode
+        ? 'MOCK_MODE is enabled.'
+        : 'Database environment variables were not found.';
+    console.warn(`${reason} The backend will run in mock mode using in-memory sample data.`);
 }
 
 let productIdCounter = mockProducts.length + 1;

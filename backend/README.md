@@ -143,7 +143,7 @@ Your application is now fully deployed with a secure, scalable backend and datab
 
 ## Local development (optional)
 
-Running the backend locally now works out of the box: if the variables below are **not** supplied the server boots in mock mode and serves the sample products/reviews entirely from memory. Provide real credentials only when you want to exercise Cloud SQL.
+Running the backend locally now works out of the box: if the variables below are **not** supplied (or if you set `MOCK_MODE=true`) the server boots in mock mode and serves the sample products/reviews entirely from memory. Provide real credentials only when you want to exercise Cloud SQL.
 
 ```
 export DB_USER=<db user>
@@ -151,6 +151,18 @@ export DB_PASSWORD=<db password>
 export DB_NAME=<db name>
 export DB_HOST=<db host, e.g. localhost>
 # optionally: DB_PORT (defaults to 5432) or DB_SOCKET_PATH/INSTANCE_CONNECTION_NAME for Unix sockets
+# set MOCK_MODE=true to force in-memory data even when the env vars above exist
 ```
 
 Once the database is reachable, `npm install && npm start` will boot the Express server locally on port 8080.
+
+## Seed the database
+
+When you want the hosted PostgreSQL instance to contain the demo catalog, run the provided SQL script (this truncates `products` and `reviews` before inserting sample rows):
+
+```
+gcloud sql connect peacock-db --user=postgres
+\i backend/seed.sql
+```
+
+Replace the instance/user as needed for your environment. The script truncates `products`, `reviews`, `users`, and `orders`, then repopulates them with the sample catalog. Seeded user passwords are `peacock123`, so you can immediately log in to the frontend with `priya@example.com` or `rohan@example.com`.
