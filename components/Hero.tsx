@@ -4,7 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 
 const defaultTagline = 'Peacock - Love is all about sharing what we cherish!';
 const heroBackdrop = {
-    backgroundImage: `url('/feather-pattern.svg')`,
+    backgroundImage: `url('feather-pattern.svg')`,
     backgroundSize: '220px',
     backgroundRepeat: 'repeat',
 };
