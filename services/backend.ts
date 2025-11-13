@@ -6,7 +6,7 @@ const sanitizeUrl = (url: string) => {
     return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
 };
 
-const DEFAULT_API_BASE_URL = 'https://peacock-backend-service-806651932334.europe-west1.run.app/api';
+const DEFAULT_API_BASE_URL = 'http://localhost:8080/api';
 const API_BASE_URL = sanitizeUrl(import.meta.env?.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL);
 
 if (!API_BASE_URL) {

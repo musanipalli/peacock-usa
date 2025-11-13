@@ -3,6 +3,12 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
+const {
+    mockProducts,
+    mockReviews,
+    mockUsers,
+    mockOrders,
+} = require('./mockData');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -22,16 +28,29 @@ const resolveDbHost = () => {
   return process.env.DB_HOST || '127.0.0.1';
 };
 
-const pool = new Pool({
+const isDbConfigured = process.env.DB_USER && process.env.DB_PASSWORD && process.env.DB_NAME;
+
+const pool = isDbConfigured ? new Pool({
   user: process.env.DB_USER,
   host: resolveDbHost(),
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
-});
+}) : null;
+
+if (!isDbConfigured) {
+    console.warn('Database environment variables were not found. The backend will run in mock mode using in-memory sample data.');
+}
+
+let productIdCounter = mockProducts.length + 1;
+let reviewIdCounter = mockReviews.length + 1;
 
 // --- Database Initialization ---
 const initializeDb = async () => {
+    if (!pool) {
+        console.log('Skipping database initialization because mock mode is enabled.');
+        return;
+    }
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -107,17 +126,35 @@ const apiRouter = express.Router();
 apiRouter.post('/signup', async (req, res) => {
     const { user, userType } = req.body;
     try {
-        const existing = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [user.email, userType]);
-        if (existing.rows.length > 0) {
-            return res.status(409).send(`A ${userType} account with this email already exists.`);
+        if (!pool) {
+            const existingUser = mockUsers.find(u => u.email === user.email && u.userType === userType);
+            if (existingUser) {
+                return res.status(409).send(`A ${userType} account with this email already exists.`);
+            }
+        } else {
+            const existing = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [user.email, userType]);
+            if (existing.rows.length > 0) {
+                return res.status(409).send(`A ${userType} account with this email already exists.`);
+            }
         }
         
         const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-        
-        await pool.query(
-            'INSERT INTO users (name, email, password, user_type, phone_number) VALUES ($1, $2, $3, $4, $5)',
-            [user.name, user.email, hashedPassword, userType, '']
-        );
+
+        if (!pool) {
+            mockUsers.push({
+                id: mockUsers.length + 1,
+                name: user.name,
+                email: user.email,
+                password: hashedPassword,
+                userType,
+                phoneNumber: '',
+            });
+        } else {
+            await pool.query(
+                'INSERT INTO users (name, email, password, user_type, phone_number) VALUES ($1, $2, $3, $4, $5)',
+                [user.name, user.email, hashedPassword, userType, '']
+            );
+        }
         res.status(201).json({ success: true, message: 'Account created successfully! Please log in.' });
     } catch (err) {
         console.error('Signup Error:', err);
@@ -128,8 +165,13 @@ apiRouter.post('/signup', async (req, res) => {
 apiRouter.post('/login', async (req, res) => {
     const { email, password, userType } = req.body;
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [email, userType]);
-        const foundUser = result.rows[0];
+        let foundUser;
+        if (!pool) {
+            foundUser = mockUsers.find(u => u.email === email && u.userType === userType);
+        } else {
+            const result = await pool.query('SELECT * FROM users WHERE email = $1 AND user_type = $2', [email, userType]);
+            foundUser = result.rows[0];
+        }
 
         if (foundUser) {
             const match = await bcrypt.compare(password, foundUser.password);
@@ -137,7 +179,7 @@ apiRouter.post('/login', async (req, res) => {
                 const userResponse = {
                     name: foundUser.name,
                     email: foundUser.email,
-                    phoneNumber: foundUser.phone_number
+                    phoneNumber: foundUser.phoneNumber || foundUser.phone_number
                 };
                 return res.json({ success: true, user: userResponse });
             }
@@ -154,16 +196,26 @@ apiRouter.put('/users/:email', async (req, res) => {
     const { email } = req.params;
     const { name, phoneNumber } = req.body;
     try {
-        const result = await pool.query(
-            'UPDATE users SET name = $1, phone_number = $2 WHERE email = $3 RETURNING *',
-            [name, phoneNumber, email]
-        );
-        const updatedUser = result.rows[0];
+        let updatedUser;
+        if (!pool) {
+            const user = mockUsers.find(u => u.email === email);
+            if (user) {
+                user.name = name;
+                user.phoneNumber = phoneNumber;
+                updatedUser = user;
+            }
+        } else {
+            const result = await pool.query(
+                'UPDATE users SET name = $1, phone_number = $2 WHERE email = $3 RETURNING *',
+                [name, phoneNumber, email]
+            );
+            updatedUser = result.rows[0];
+        }
         if (updatedUser) {
             res.json({
                 name: updatedUser.name,
                 email: updatedUser.email,
-                phoneNumber: updatedUser.phone_number,
+                phoneNumber: updatedUser.phoneNumber || updatedUser.phone_number,
             });
         } else {
             res.status(404).send('User not found');
@@ -177,8 +229,13 @@ apiRouter.put('/users/:email', async (req, res) => {
 apiRouter.post('/change-password', async (req, res) => {
     const { email, currentPassword, newPassword } = req.body;
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = result.rows[0];
+        let user;
+        if (!pool) {
+            user = mockUsers.find(u => u.email === email);
+        } else {
+            const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+            user = result.rows[0];
+        }
 
         if (!user) {
             return res.status(404).send('User not found.');
@@ -190,7 +247,11 @@ apiRouter.post('/change-password', async (req, res) => {
         }
 
         const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-        await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedNewPassword, email]);
+        if (!pool) {
+            user.password = hashedNewPassword;
+        } else {
+            await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedNewPassword, email]);
+        }
 
         res.json({ success: true, message: 'Password updated successfully!' });
     } catch (err) {
@@ -203,6 +264,9 @@ apiRouter.post('/change-password', async (req, res) => {
 // Product Endpoints
 apiRouter.get('/products', async (req, res) => {
     try {
+        if (!pool) {
+            return res.json(mockProducts);
+        }
         const result = await pool.query('SELECT * FROM products ORDER BY id');
         const products = result.rows.map(p => ({
             id: p.id,
@@ -224,6 +288,20 @@ apiRouter.get('/products', async (req, res) => {
 apiRouter.post('/products', async (req, res) => {
     const { name, category, description, imageUrls, buyPrice, rentPrice, sellerEmail } = req.body;
     try {
+        if (!pool) {
+            const newProduct = {
+                id: productIdCounter++,
+                name,
+                category,
+                description,
+                imageUrls,
+                buyPrice,
+                rentPrice,
+                sellerEmail,
+            };
+            mockProducts.push(newProduct);
+            return res.status(201).json(newProduct);
+        }
         const result = await pool.query(
             'INSERT INTO products (name, category, description, image_urls, buy_price, rent_price, seller_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
             [name, category, description, imageUrls, buyPrice, rentPrice, sellerEmail]
@@ -249,6 +327,22 @@ apiRouter.put('/products/:id', async (req, res) => {
     const { id } = req.params;
     const { name, category, description, imageUrls, buyPrice, rentPrice } = req.body;
     try {
+        if (!pool) {
+            const index = mockProducts.findIndex(p => p.id === Number(id));
+            if (index === -1) {
+                return res.status(404).send('Product not found');
+            }
+            mockProducts[index] = {
+                ...mockProducts[index],
+                name,
+                category,
+                description,
+                imageUrls,
+                buyPrice,
+                rentPrice,
+            };
+            return res.json(mockProducts[index]);
+        }
         const result = await pool.query(
             'UPDATE products SET name = $1, category = $2, description = $3, image_urls = $4, buy_price = $5, rent_price = $6 WHERE id = $7 RETURNING *',
             [name, category, description, imageUrls, buyPrice, rentPrice, id]
@@ -273,6 +367,14 @@ apiRouter.put('/products/:id', async (req, res) => {
 apiRouter.delete('/products/:id', async (req, res) => {
     const { id } = req.params;
     try {
+        if (!pool) {
+            const index = mockProducts.findIndex(p => p.id === Number(id));
+            if (index === -1) {
+                return res.status(404).send('Product not found');
+            }
+            mockProducts.splice(index, 1);
+            return res.status(200).json({ success: true });
+        }
         const result = await pool.query('DELETE FROM products WHERE id = $1', [id]);
         if (result.rowCount > 0) {
             res.status(200).json({ success: true });
@@ -288,6 +390,9 @@ apiRouter.delete('/products/:id', async (req, res) => {
 // Review Endpoints
 apiRouter.get('/reviews', async (req, res) => {
     try {
+        if (!pool) {
+            return res.json(mockReviews);
+        }
         const result = await pool.query('SELECT * FROM reviews ORDER BY id DESC');
         const reviews = result.rows.map(r => ({
             id: r.id,
@@ -307,6 +412,18 @@ apiRouter.get('/reviews', async (req, res) => {
 apiRouter.post('/reviews', async (req, res) => {
     const { productId, author, location, text, rating } = req.body;
     try {
+        if (!pool) {
+            const newReview = {
+                id: reviewIdCounter++,
+                productId,
+                author,
+                location,
+                text,
+                rating,
+            };
+            mockReviews.unshift(newReview);
+            return res.status(201).json(newReview);
+        }
         const result = await pool.query(
             'INSERT INTO reviews (product_id, author, location, text, rating) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [productId, author, location, text, rating]
@@ -333,6 +450,19 @@ apiRouter.post('/orders', async (req, res) => {
     const orderId = `PCK-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     const orderDate = new Date();
     try {
+        if (!pool) {
+            const order = {
+                id: orderId,
+                userEmail,
+                date: orderDate.toISOString(),
+                items,
+                total,
+                status: 'Processing',
+                shippingDetails,
+            };
+            mockOrders.push(order);
+            return res.status(201).json(order);
+        }
         const result = await pool.query(
             'INSERT INTO orders (id, user_email, date, items, total, status, shipping_details) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
             [orderId, userEmail, orderDate, items, total, 'Processing', shippingDetails]
@@ -347,6 +477,12 @@ apiRouter.post('/orders', async (req, res) => {
 apiRouter.get('/orders/:userEmail', async (req, res) => {
     const { userEmail } = req.params;
     try {
+        if (!pool) {
+            const orders = mockOrders
+                .filter(order => order.userEmail === userEmail)
+                .sort((a, b) => (a.date < b.date ? 1 : -1));
+            return res.json(orders);
+        }
         const result = await pool.query('SELECT * FROM orders WHERE user_email = $1 ORDER BY date DESC', [userEmail]);
         const orders = result.rows.map(order => ({
             id: order.id,

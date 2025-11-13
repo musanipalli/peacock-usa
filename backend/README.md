@@ -143,7 +143,7 @@ Your application is now fully deployed with a secure, scalable backend and datab
 
 ## Local development (optional)
 
-You can point the backend at any reachable PostgreSQL database instead of Cloud SQL sockets by exporting the following before running `npm start`:
+Running the backend locally now works out of the box: if the variables below are **not** supplied the server boots in mock mode and serves the sample products/reviews entirely from memory. Provide real credentials only when you want to exercise Cloud SQL.
 
 ```
 export DB_USER=<db user>
