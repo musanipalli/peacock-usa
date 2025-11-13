@@ -25,7 +25,6 @@ const App: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const [user, setUser] = useState<User | null>(null);
     const [userType, setUserType] = useState<UserType | null>(null);
@@ -61,7 +60,6 @@ const App: React.FC = () => {
     const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
-            setError(null);
             setIsOfflineMode(false);
             setConnectionWarning(null);
             const [productsData, reviewsData] = await Promise.all([
@@ -218,7 +216,6 @@ const App: React.FC = () => {
     // Render logic
     const renderPage = () => {
         if (isLoading) return <div className="flex justify-center items-center h-96"><LoadingSpinner /></div>;
-        if (error) return <div className="text-center text-red-500 p-8 bg-red-50 rounded-lg max-w-2xl mx-auto mt-10"><h3 className="font-bold">Connection Error</h3><p>{error}</p></div>;
 
         switch (page) {
             case 'checkout':
