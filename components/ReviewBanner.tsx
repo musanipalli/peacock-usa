@@ -24,9 +24,10 @@ export const ReviewBanner: React.FC<{reviews: Review[]}> = ({ reviews }) => {
     }
 
     return (
-        <section className="bg-peacock-emerald/10 py-16">
-            <div className="container mx-auto px-4 text-center text-peacock-dark">
-                <h2 className="text-3xl font-bold font-serif text-center mb-10 text-peacock-dark">What Our Customers Say</h2>
+        <section className="py-16 bg-gradient-to-br from-[#050505] via-[#0c2b1e] to-[#050505] border-y border-white/5">
+            <div className="container mx-auto px-6 text-center text-white">
+                <p className="text-xs uppercase tracking-[0.5em] text-white/40">Testimonials</p>
+                <h2 className="text-3xl font-serif text-white mt-2 mb-10">Loved by our global patrons</h2>
                 <div className="relative overflow-hidden h-64 flex items-center justify-center">
                     {reviews.map((review, index) => (
                         <div
@@ -36,9 +37,9 @@ export const ReviewBanner: React.FC<{reviews: Review[]}> = ({ reviews }) => {
                             <div className="flex justify-center mb-4">
                                 {[...Array(5)].map((_, i) => <StarIcon key={i} filled={i < review.rating} />)}
                             </div>
-                            <p className="text-xl md:text-2xl font-serif italic mb-4 max-w-3xl mx-auto">"{review.text}"</p>
-                            <p className="font-bold text-lg">{review.author}</p>
-                            <p className="text-sm text-peacock-dark/70">{review.location}</p>
+                            <p className="text-xl md:text-2xl font-serif italic mb-4 max-w-3xl mx-auto text-white/90">"{review.text}"</p>
+                            <p className="font-bold text-lg text-peacock-gold-light">{review.author}</p>
+                            <p className="text-sm text-white/60">{review.location}</p>
                         </div>
                     ))}
                 </div>

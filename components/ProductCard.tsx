@@ -21,7 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 animate-slide-in">
+    <div className="bg-[#090909] border border-white/5 rounded-3xl overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 animate-slide-in shadow-2xl shadow-black/40">
       <div className="relative">
         <img src={product.imageUrls[0] || 'https://picsum.photos/seed/placeholder/400/500'} alt={product.name} className="w-full h-80 object-cover" />
 
@@ -57,14 +57,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
             </button>
         </div>
       </div>
-      <div className="p-4 text-center">
-        <h3 className="text-lg font-bold font-serif text-peacock-dark">{product.name}</h3>
-        <div className="mt-2 flex justify-center items-center space-x-4">
-          <p className="text-gray-600">
+      <div className="p-6 text-center text-white">
+        <h3 className="text-lg font-serif text-white">{product.name}</h3>
+        <div className="mt-3 flex justify-center items-center space-x-5 text-sm text-white/70">
+          <p>
             Rent from <span className="font-bold text-peacock-emerald">${product.rentPrice}</span>
           </p>
-           <p className="text-gray-600">
-            Buy for <span className="font-bold text-peacock-marigold">${product.buyPrice}</span>
+           <p>
+            Buy for <span className="font-bold text-peacock-gold-light">${product.buyPrice}</span>
           </p>
         </div>
       </div>

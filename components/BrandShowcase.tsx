@@ -23,21 +23,21 @@ const lockups = [
 ];
 
 export const BrandShowcase: React.FC = () => (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-[#050505] border-t border-white/10 text-white">
         <div className="container mx-auto px-6">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
                 <div>
                     <p className="text-xs uppercase tracking-[0.5em] text-peacock-emerald">Brand kit</p>
                     <h2 className="text-3xl md:text-4xl font-serif text-peacock-dark mt-2">Crests &amp; Wordmarks</h2>
-                    <p className="text-peacock-dark/70 mt-2 max-w-2xl">
+                    <p className="text-white/70 mt-2 max-w-2xl">
                         Inspired by the provided logo board, these lockups combine the gilded feather with the signature
                         script line “Peacock – Love is all about sharing what we cherish!”. Drop them into hero banners,
                         onboarding emails, or event microsites for an instantly recognizable touch.
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span className="w-3 h-3 rounded-full bg-peacock-magenta animate-pulse" />
-                    <p className="text-sm text-peacock-dark/70">Premium UI refresh applied</p>
+                        <span className="w-3 h-3 rounded-full bg-peacock-magenta animate-pulse" />
+                    <p className="text-sm text-white/70">Premium UI refresh applied</p>
                 </div>
             </div>
             <div className="grid gap-6 md:grid-cols-3">

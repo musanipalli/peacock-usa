@@ -53,16 +53,34 @@ const DropdownLink: React.FC<{ href?: string; children: React.ReactNode; onClick
     </a>
 );
 
-export const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onLoginClick, user, userType, onLogout, onOrderHistoryClick, onProfileClick, onMyProductsClick, onVideoGeneratorClick, onSelectCategory, onGoHome }) => {
+export const Header: React.FC<HeaderProps> = ({
+    cartItemCount,
+    onCartClick,
+    onLoginClick,
+    user,
+    userType,
+    onLogout,
+    onOrderHistoryClick,
+    onProfileClick,
+    onMyProductsClick,
+    onVideoGeneratorClick,
+    onSelectCategory,
+    onGoHome,
+}) => {
     return (
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
-                    <button onClick={onGoHome} className="flex items-center focus:outline-none">
-                        <PeacockLogo className="h-12 w-12" />
-                        <h1 className="ml-2 text-2xl font-serif font-bold text-peacock-dark">Peacock</h1>
+        <header className="sticky top-0 z-40 border-b border-white/10 bg-[#020202]/85 backdrop-blur-xl text-white">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-10">
+                <div className="flex h-20 items-center justify-between gap-6">
+                    <button onClick={onGoHome} className="flex items-center gap-3">
+                        <div className="h-14 w-14 rounded-full bg-white/5 p-2 shadow-lg ring-1 ring-white/10">
+                            <PeacockLogo className="h-full w-full" />
+                        </div>
+                        <div>
+                            <p className="text-xl font-script leading-none text-peacock-gold-light">Peacock</p>
+                            <p className="text-xs uppercase tracking-[0.35em] text-white/60">Est. 2025</p>
+                        </div>
                     </button>
-                    <nav className="hidden md:flex items-center space-x-8">
+                    <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
                         <NavLink onClick={() => onSelectCategory(Category.Women)}>Women</NavLink>
                         <NavLink onClick={() => onSelectCategory(Category.Men)}>Men</NavLink>
                         <Dropdown title="Kids">
@@ -71,36 +89,35 @@ export const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onLo
                         </Dropdown>
                         <Dropdown title="Accessories">
                             <DropdownLink onClick={() => onSelectCategory(Category.Handbags)}>Handbags</DropdownLink>
+                            <DropdownLink onClick={() => onSelectCategory(Category.Jwellery)}>Jewellery</DropdownLink>
                             <DropdownLink onClick={() => onSelectCategory(Category.Shoes)}>Shoes</DropdownLink>
-                            <DropdownLink onClick={() => onSelectCategory(Category.Jwellery)}>Jwellery</DropdownLink>
                         </Dropdown>
-                        <Dropdown title="Home Decor">
-                            <DropdownLink onClick={() => onSelectCategory(Category.PoojaItems)}>Pooja Items</DropdownLink>
-                            <DropdownLink onClick={() => onSelectCategory(Category.HomeDecor)}>Decor</DropdownLink>
+                        <Dropdown title="Decor">
+                            <DropdownLink onClick={() => onSelectCategory(Category.HomeDecor)}>Home</DropdownLink>
+                            <DropdownLink onClick={() => onSelectCategory(Category.PoojaItems)}>Pooja</DropdownLink>
                         </Dropdown>
-                        <NavLink>About Us</NavLink>
-                        <NavLink>Community</NavLink>
-                        <NavLink onClick={onVideoGeneratorClick}>Video Gen</NavLink>
+                        <NavLink onClick={onVideoGeneratorClick}>Video Atelier</NavLink>
+                        <NavLink>Stories</NavLink>
                     </nav>
-                    <div className="flex items-center space-x-4">
-                         <button className="text-gray-600 hover:text-peacock-magenta transition-colors duration-300">
-                           <SearchIcon className="h-6 w-6" />
+                    <div className="flex items-center gap-3">
+                        <button className="rounded-full border border-white/10 p-2 text-white/70 hover:border-white/50 hover:text-white transition">
+                            <SearchIcon className="h-5 w-5" />
                         </button>
-                        <button onClick={onCartClick} className="relative text-gray-600 hover:text-peacock-magenta transition-colors duration-300">
-                            <CartIcon className="h-7 w-7" />
+                        <button onClick={onCartClick} className="relative rounded-full border border-white/10 p-2 text-white/70 hover:text-white hover:border-white/50 transition">
+                            <CartIcon className="h-6 w-6" />
                             {cartItemCount > 0 && (
-                                <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-peacock-magenta text-white text-xs font-bold">
+                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-peacock-magenta text-xs font-bold text-white">
                                     {cartItemCount}
                                 </span>
                             )}
                         </button>
-                         {user ? (
+                        {user ? (
                             <div className="relative group">
-                                <button className="flex items-center space-x-2 font-medium text-sm text-peacock-dark px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200">
-                                     <span>Hi, {user.name.split(' ')[0]}</span>
-                                     <ChevronDownIcon className="h-3 w-3" />
+                                <button className="flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10">
+                                    <span className="text-white/80">Hi, {user.name.split(' ')[0]}</span>
+                                    <ChevronDownIcon className="h-3 w-3" />
                                 </button>
-                                <div className="absolute top-full right-0 pt-2 w-48 bg-white rounded-md shadow-lg py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 invisible group-hover:visible z-50">
+                                <div className="invisible absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/10 bg-[#0f0f0f] p-2 text-white/80 opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
                                     <DropdownLink onClick={onProfileClick}>My Profile</DropdownLink>
                                     <DropdownLink onClick={onOrderHistoryClick}>Order History</DropdownLink>
                                     {userType === 'seller' && (
@@ -110,9 +127,9 @@ export const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onLo
                                 </div>
                             </div>
                         ) : (
-                            <button 
+                            <button
                                 onClick={onLoginClick}
-                                className="bg-peacock-magenta text-white px-4 py-2 rounded-full hover:bg-peacock-sapphire transition-all duration-300 shadow-sm font-medium text-sm"
+                                className="rounded-full bg-peacock-magenta px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-peacock-magenta/30 transition hover:bg-peacock-sapphire"
                             >
                                 Login
                             </button>
