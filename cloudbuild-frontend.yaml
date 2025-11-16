@@ -24,9 +24,6 @@ steps:
     - '--port=80'
     - '--quiet'
 
-images:
-  - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
-
 substitutions:
   _REGION: europe-west1
   _FRONTEND_SERVICE: peacock-frontend
