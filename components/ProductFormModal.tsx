@@ -266,7 +266,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                             <input type="number" name="buyPrice" value={formData.buyPrice} onChange={handleInputChange} className="w-full p-2 mt-1 border rounded-md" required min="0" step="0.01"/>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-gray-700">Rent Price ($)</label>
+                            <label className="text-sm font-medium text-gray-700">Rent Price ($ / day)</label>
                             <input type="number" name="rentPrice" value={formData.rentPrice} onChange={handleInputChange} className="w-full p-2 mt-1 border rounded-md" required min="0" step="0.01"/>
                         </div>
                     </div>

@@ -80,8 +80,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, 
                                     onClick={() => onAddToCart(product, CartAction.Rent)}
                                     className="w-full bg-peacock-emerald text-white py-3 rounded-full hover:bg-peacock-sapphire transition-colors duration-300 font-bold flex justify-between items-center px-6"
                                 >
-                                    <span>Rent Now</span>
-                                    <span className="text-lg">${product.rentPrice}</span>
+                                    <span>Rent per day</span>
+                                    <span className="text-lg">${product.rentPrice}<span className="text-sm opacity-80 ml-1">/day</span></span>
                                 </button>
                                 <button
                                     onClick={() => onAddToCart(product, CartAction.Buy)}

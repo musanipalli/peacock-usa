@@ -61,7 +61,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView, 
         <h3 className="text-lg font-serif text-white">{product.name}</h3>
         <div className="mt-3 flex justify-center items-center space-x-5 text-sm text-white/70">
           <p>
-            Rent from <span className="font-bold text-peacock-emerald">${product.rentPrice}</span>
+            Rent from <span className="font-bold text-peacock-emerald">${product.rentPrice}</span><span className="text-xs text-white/50"> / day</span>
           </p>
            <p>
             Buy for <span className="font-bold text-peacock-gold-light">${product.buyPrice}</span>

@@ -184,6 +184,8 @@ const App: React.FC = () => {
             const newProduct = await backend.addProduct(productData);
             setProducts(prev => [...prev, newProduct]);
             showToast('Product added successfully!');
+            setPage('home');
+            setSelectedCategory(newProduct.category);
         } catch(err) {
             showToast('Failed to add product.');
         }

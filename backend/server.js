@@ -10,6 +10,18 @@ const {
     mockOrders,
 } = require('./mockData');
 
+const catalogCategories = [
+    { slug: 'women', label: 'Women' },
+    { slug: 'men', label: 'Men' },
+    { slug: 'kids-boys', label: 'Kids - Boys' },
+    { slug: 'kids-girls', label: 'Kids - Girls' },
+    { slug: 'handbags', label: 'Handbags' },
+    { slug: 'shoes', label: 'Shoes' },
+    { slug: 'jwellery', label: 'Jewellery' },
+    { slug: 'pooja-items', label: 'Pooja Items' },
+    { slug: 'home-decor', label: 'Home Decor' },
+];
+
 const app = express();
 const port = process.env.PORT || 8080;
 const saltRounds = 10;
@@ -85,6 +97,13 @@ const initializeDb = async () => {
         `);
         
         await client.query(`
+            CREATE TABLE IF NOT EXISTS categories (
+                slug VARCHAR(100) PRIMARY KEY,
+                label VARCHAR(255) NOT NULL
+            );
+        `);
+        
+        await client.query(`
             CREATE TABLE IF NOT EXISTS reviews (
                 id SERIAL PRIMARY KEY,
                 product_id INTEGER NOT NULL,
@@ -107,6 +126,13 @@ const initializeDb = async () => {
                 shipping_details JSONB
             );
         `);
+
+        for (const category of catalogCategories) {
+            await client.query(
+                'INSERT INTO categories (slug, label) VALUES ($1, $2) ON CONFLICT (slug) DO NOTHING',
+                [category.slug, category.label]
+            );
+        }
 
         await client.query('COMMIT');
         console.log('Database tables are ready.');

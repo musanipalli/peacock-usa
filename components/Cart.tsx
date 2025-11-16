@@ -18,6 +18,7 @@ const CartItemRow: React.FC<{ item: CartItem; onRemove: (productId: number, acti
             <p className="text-sm text-gray-500 capitalize">{item.action}</p>
             <p className="text-sm font-bold text-peacock-emerald">
                 ${item.action === CartAction.Buy ? item.product.buyPrice : item.product.rentPrice}
+                {item.action === CartAction.Rent && <span className="text-xs text-gray-500 ml-1">/day</span>}
             </p>
         </div>
         <button onClick={() => onRemove(item.product.id, item.action)} className="text-gray-400 hover:text-red-500 transition-colors">

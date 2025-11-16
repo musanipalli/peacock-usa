@@ -45,7 +45,19 @@ CREATE TABLE IF NOT EXISTS orders (
 TRUNCATE TABLE orders RESTART IDENTITY CASCADE;
 TRUNCATE TABLE reviews RESTART IDENTITY CASCADE;
 TRUNCATE TABLE products RESTART IDENTITY CASCADE;
+TRUNCATE TABLE categories RESTART IDENTITY CASCADE;
 TRUNCATE TABLE users RESTART IDENTITY CASCADE;
+
+INSERT INTO categories (slug, label) VALUES
+('women', 'Women'),
+('men', 'Men'),
+('kids-boys', 'Kids - Boys'),
+('kids-girls', 'Kids - Girls'),
+('handbags', 'Handbags'),
+('shoes', 'Shoes'),
+('jwellery', 'Jewellery'),
+('pooja-items', 'Pooja Items'),
+('home-decor', 'Home Decor');
 
 INSERT INTO products (name, category, description, styling_notes, image_urls, buy_price, rent_price, seller_email) VALUES
 ('Royal Blue Lehenga', 'women', 'A stunning lehenga with intricate gold embroidery.', 'Pair with polki jewellery and kundan bangles.', ARRAY['https://picsum.photos/seed/lehenga/400/500']::text[], 450, 90, 'seller@peacock.com'),

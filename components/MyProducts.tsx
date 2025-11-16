@@ -109,13 +109,13 @@ export const MyProducts: React.FC<MyProductsProps> = ({ user, allProducts, revie
     const averageRating = summary.reviewCount ? (summary.ratingTotal / summary.reviewCount).toFixed(1) : '—';
 
     return (
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-12 text-gray-900">
             <div className="max-w-6xl mx-auto space-y-10">
                 <button onClick={onBack} className="text-peacock-sapphire hover:underline font-medium">&larr; Back to Shopping</button>
                 <div className="flex flex-col md:flex-row justify-between gap-4 md:items-center">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.5em] text-white/60">Seller cockpit</p>
-                        <h1 className="text-3xl font-bold font-serif text-white">My Products Dashboard</h1>
+                        <p className="text-xs uppercase tracking-[0.5em] text-gray-500">Seller cockpit</p>
+                        <h1 className="text-3xl font-bold font-serif text-gray-900">My Products Dashboard</h1>
                     </div>
                     <button
                         onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}
@@ -127,25 +127,25 @@ export const MyProducts: React.FC<MyProductsProps> = ({ user, allProducts, revie
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                        <p className="text-xs uppercase tracking-[0.3em] text-white/60">Listings</p>
-                        <p className="text-3xl font-serif mt-2">{sellerProducts.length}</p>
-                        <p className="text-sm text-white/60">Active couture pieces</p>
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow">
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Listings</p>
+                        <p className="text-3xl font-serif mt-2 text-gray-900">{sellerProducts.length}</p>
+                        <p className="text-sm text-gray-500">Active couture pieces</p>
                     </div>
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                        <p className="text-xs uppercase tracking-[0.3em] text-white/60">Lifetime rentals</p>
-                        <p className="text-3xl font-serif mt-2">{summary.totalRentals}</p>
-                        <p className="text-sm text-white/60">Based on storefront traffic</p>
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow">
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Lifetime rentals</p>
+                        <p className="text-3xl font-serif mt-2 text-gray-900">{summary.totalRentals}</p>
+                        <p className="text-sm text-gray-500">Based on storefront traffic</p>
                     </div>
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                        <p className="text-xs uppercase tracking-[0.3em] text-white/60">Pieces sold</p>
-                        <p className="text-3xl font-serif mt-2">{summary.totalSales}</p>
-                        <p className="text-sm text-white/60">Completed buyouts</p>
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow">
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Pieces sold</p>
+                        <p className="text-3xl font-serif mt-2 text-gray-900">{summary.totalSales}</p>
+                        <p className="text-sm text-gray-500">Completed buyouts</p>
                     </div>
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                        <p className="text-xs uppercase tracking-[0.3em] text-white/60">Avg. rating</p>
-                        <p className="text-3xl font-serif mt-2">{averageRating}</p>
-                        <p className="text-sm text-white/60">{summary.reviewCount} reviews</p>
+                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow">
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Avg. rating</p>
+                        <p className="text-3xl font-serif mt-2 text-gray-900">{averageRating}</p>
+                        <p className="text-sm text-gray-500">{summary.reviewCount} reviews</p>
                     </div>
                 </div>
 
@@ -232,9 +232,9 @@ export const MyProducts: React.FC<MyProductsProps> = ({ user, allProducts, revie
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-16 bg-white/10 rounded-lg border border-dashed border-white/20">
-                            <h2 className="text-xl font-semibold text-white">You haven’t listed any products yet.</h2>
-                            <p className="text-white/70 mt-2">Click “Add New Product” to start showcasing your wardrobe.</p>
+                                <div className="text-center py-16 bg-white rounded-lg border border-dashed border-gray-200">
+                            <h2 className="text-xl font-semibold text-gray-900">You haven’t listed any products yet.</h2>
+                            <p className="text-gray-500 mt-2">Click “Add New Product” to start showcasing your wardrobe.</p>
                         </div>
                     )}
                 </div>
