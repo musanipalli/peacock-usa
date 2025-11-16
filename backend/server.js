@@ -76,6 +76,7 @@ const initializeDb = async () => {
                 name VARCHAR(255) NOT NULL,
                 category VARCHAR(100) NOT NULL,
                 description TEXT,
+                styling_notes TEXT,
                 image_urls TEXT[],
                 buy_price NUMERIC(10, 2) NOT NULL,
                 rent_price NUMERIC(10, 2) NOT NULL,
@@ -277,6 +278,7 @@ apiRouter.get('/products', async (req, res) => {
             name: p.name,
             category: p.category,
             description: p.description,
+            stylingNotes: p.styling_notes,
             imageUrls: p.image_urls,
             buyPrice: parseFloat(p.buy_price),
             rentPrice: parseFloat(p.rent_price),
@@ -290,7 +292,7 @@ apiRouter.get('/products', async (req, res) => {
 });
 
 apiRouter.post('/products', async (req, res) => {
-    const { name, category, description, imageUrls, buyPrice, rentPrice, sellerEmail } = req.body;
+    const { name, category, description, stylingNotes, imageUrls, buyPrice, rentPrice, sellerEmail } = req.body;
     try {
         if (!pool) {
             const newProduct = {
@@ -298,6 +300,7 @@ apiRouter.post('/products', async (req, res) => {
                 name,
                 category,
                 description,
+                stylingNotes,
                 imageUrls,
                 buyPrice,
                 rentPrice,
@@ -307,8 +310,8 @@ apiRouter.post('/products', async (req, res) => {
             return res.status(201).json(newProduct);
         }
         const result = await pool.query(
-            'INSERT INTO products (name, category, description, image_urls, buy_price, rent_price, seller_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [name, category, description, imageUrls, buyPrice, rentPrice, sellerEmail]
+            'INSERT INTO products (name, category, description, styling_notes, image_urls, buy_price, rent_price, seller_email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [name, category, description, stylingNotes, imageUrls, buyPrice, rentPrice, sellerEmail]
         );
         const p = result.rows[0];
          res.status(201).json({
@@ -316,6 +319,7 @@ apiRouter.post('/products', async (req, res) => {
             name: p.name,
             category: p.category,
             description: p.description,
+            stylingNotes: p.styling_notes,
             imageUrls: p.image_urls,
             buyPrice: parseFloat(p.buy_price),
             rentPrice: parseFloat(p.rent_price),
@@ -329,7 +333,7 @@ apiRouter.post('/products', async (req, res) => {
 
 apiRouter.put('/products/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, category, description, imageUrls, buyPrice, rentPrice } = req.body;
+    const { name, category, description, stylingNotes, imageUrls, buyPrice, rentPrice } = req.body;
     try {
         if (!pool) {
             const index = mockProducts.findIndex(p => p.id === Number(id));
@@ -341,6 +345,7 @@ apiRouter.put('/products/:id', async (req, res) => {
                 name,
                 category,
                 description,
+                stylingNotes,
                 imageUrls,
                 buyPrice,
                 rentPrice,
@@ -348,8 +353,8 @@ apiRouter.put('/products/:id', async (req, res) => {
             return res.json(mockProducts[index]);
         }
         const result = await pool.query(
-            'UPDATE products SET name = $1, category = $2, description = $3, image_urls = $4, buy_price = $5, rent_price = $6 WHERE id = $7 RETURNING *',
-            [name, category, description, imageUrls, buyPrice, rentPrice, id]
+            'UPDATE products SET name = $1, category = $2, description = $3, styling_notes = $4, image_urls = $5, buy_price = $6, rent_price = $7 WHERE id = $8 RETURNING *',
+            [name, category, description, stylingNotes, imageUrls, buyPrice, rentPrice, id]
         );
         const p = result.rows[0];
         res.json({
@@ -357,6 +362,7 @@ apiRouter.put('/products/:id', async (req, res) => {
             name: p.name,
             category: p.category,
             description: p.description,
+            stylingNotes: p.styling_notes,
             imageUrls: p.image_urls,
             buyPrice: parseFloat(p.buy_price),
             rentPrice: parseFloat(p.rent_price),

@@ -89,6 +89,8 @@ const App: React.FC = () => {
     const handleLoginSuccess = (loggedInUser: User, type: UserType) => {
         setUser(loggedInUser);
         setUserType(type);
+        setSelectedCategory(null);
+        setPage(type === 'seller' ? 'myProducts' : 'home');
         showToast(`Welcome, ${loggedInUser.name}!`);
     };
     
@@ -236,7 +238,7 @@ const App: React.FC = () => {
                 );
             case 'myProducts':
                 return user ? (
-                    <MyProducts user={user} allProducts={products} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={() => setPage('home')} />
+                    <MyProducts user={user} allProducts={products} reviews={reviews} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={() => setPage('home')} />
                 ) : (
                     renderProtectedMessage('Share your wardrobe', 'Only verified hosts can upload or update couture listings.')
                 );

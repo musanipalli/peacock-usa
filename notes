@@ -10,3 +10,7 @@ to redeploy your databse
 
   to see the ooutput logs 
   gcloud run services logs read peacock-backend-service --region=europe-west1 --limit=50
+
+  Customer: Priya Sharma — priya@example.com / peacock123
+Customer: Rohan Patel — rohan@example.com / peacock123
+Seller: Anita Rao — anita@example.com / peacock123

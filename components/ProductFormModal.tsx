@@ -14,6 +14,7 @@ const initialFormData = {
     name: '',
     category: Category.Women,
     description: '',
+    stylingNotes: '',
     imageUrls: [] as string[],
     buyPrice: 0,
     rentPrice: 0,
@@ -89,8 +90,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
         const files = e.target.files;
         if (!files) return;
 
-        if (formData.imageUrls.length + files.length > 5) {
-            alert('You can upload a maximum of 5 images.');
+        if (formData.imageUrls.length + files.length > 7) {
+            alert('You can upload a maximum of 7 images.');
             return;
         }
 
@@ -189,9 +190,25 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full p-2 mt-1 border rounded-md" rows={4} required></textarea>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-sm font-medium text-gray-700">Description</label>
+                            <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full p-2 mt-1 border rounded-md" rows={4} required></textarea>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700 flex justify-between items-center">
+                                Dressing Suggestions
+                                <span className="text-xs text-gray-400">Shown on product detail page</span>
+                            </label>
+                            <textarea
+                                name="stylingNotes"
+                                value={formData.stylingNotes}
+                                onChange={handleInputChange}
+                                className="w-full p-2 mt-1 border rounded-md"
+                                rows={3}
+                                placeholder="e.g., Pair with ivory heels and mirrorwork potli."
+                            ></textarea>
+                        </div>
                     </div>
                     <div>
                         <div className="flex justify-between items-center">
@@ -199,7 +216,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                                 Product Images
                                 <span className="ml-2 text-xs font-normal text-gray-400">(drag to reorder, first is primary)</span>
                             </label>
-                            <span className="text-sm font-semibold text-peacock-sapphire bg-blue-100 px-2 py-1 rounded-full">{formData.imageUrls.length} / 5</span>
+                            <span className="text-sm font-semibold text-peacock-sapphire bg-blue-100 px-2 py-1 rounded-full">{formData.imageUrls.length} / 7</span>
                         </div>
                         <div className="mt-2">
                             <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
@@ -229,7 +246,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
                                         )}
                                     </div>
                                 ))}
-                                {formData.imageUrls.length < 5 && (
+                                {formData.imageUrls.length < 7 && (
                                     <label htmlFor="image-upload" className="relative flex flex-col items-center justify-center w-full aspect-square border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                                         <div className="text-center">
                                             <svg className="mx-auto h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100) NOT NULL,
     description TEXT,
+    styling_notes TEXT,
     image_urls TEXT[],
     buy_price NUMERIC(10, 2) NOT NULL,
     rent_price NUMERIC(10, 2) NOT NULL,
@@ -46,19 +47,19 @@ TRUNCATE TABLE reviews RESTART IDENTITY CASCADE;
 TRUNCATE TABLE products RESTART IDENTITY CASCADE;
 TRUNCATE TABLE users RESTART IDENTITY CASCADE;
 
-INSERT INTO products (name, category, description, image_urls, buy_price, rent_price, seller_email) VALUES
-('Royal Blue Lehenga', 'women', 'A stunning lehenga with intricate gold embroidery.', ARRAY['https://picsum.photos/seed/lehenga/400/500']::text[], 450, 90, 'seller@peacock.com'),
-('Emerald Green Sherwani', 'men', 'Elegant silk sherwani for weddings and special occasions.', ARRAY['https://picsum.photos/seed/sherwani/400/500']::text[], 500, 100, 'seller@peacock.com'),
-('Ruby Red Saree', 'women', 'Classic Banarasi silk saree with a modern twist.', ARRAY['https://picsum.photos/seed/saree/400/500']::text[], 350, 75, 'seller@peacock.com'),
-('Golden Jhumkas', 'jwellery', 'Traditional temple jewellery-style earrings.', ARRAY['https://picsum.photos/seed/jhumkas/400/500']::text[], 80, 20, 'seller@peacock.com'),
-('Boys Kurta Pajama Set', 'kids-boys', 'Comfortable and stylish cotton kurta set for boys.', ARRAY['https://picsum.photos/seed/kurta/400/500']::text[], 120, 30, 'seller@peacock.com'),
-('Girls Anarkali Dress', 'kids-girls', 'Flowy and vibrant anarkali for young girls.', ARRAY['https://picsum.photos/seed/anarkali/400/500']::text[], 150, 40, 'seller@peacock.com'),
-('Embroidered Potli Bag', 'handbags', 'A beautiful potli bag to complete your traditional look.', ARRAY['https://picsum.photos/seed/potli/400/500']::text[], 60, 15, 'seller@peacock.com'),
-('Classic Nehru Jacket', 'men', 'A versatile jacket that can be paired with any kurta.', ARRAY['https://picsum.photos/seed/nehru/400/500']::text[], 180, 45, 'seller@peacock.com'),
-('Silver Diya Set', 'pooja-items', 'Exquisite silver-plated diyas for your pooja room.', ARRAY['https://picsum.photos/seed/diya/400/500']::text[], 150, 35, 'seller@peacock.com'),
-('Embroidered Mojaris', 'shoes', 'Handcrafted traditional mojaris with intricate threadwork.', ARRAY['https://picsum.photos/seed/mojari/400/500']::text[], 95, 25, 'seller@peacock.com'),
-('Kundan Necklace Set', 'jwellery', 'A stunning Kundan necklace with matching earrings.', ARRAY['https://picsum.photos/seed/kundan/400/500']::text[], 220, 55, 'seller@peacock.com'),
-('Peacock Wall Art', 'home-decor', 'Vibrant metal wall art to adorn your living space.', ARRAY['https://picsum.photos/seed/wallart/400/500']::text[], 130, 40, 'seller@peacock.com');
+INSERT INTO products (name, category, description, styling_notes, image_urls, buy_price, rent_price, seller_email) VALUES
+('Royal Blue Lehenga', 'women', 'A stunning lehenga with intricate gold embroidery.', 'Pair with polki jewellery and kundan bangles.', ARRAY['https://picsum.photos/seed/lehenga/400/500']::text[], 450, 90, 'seller@peacock.com'),
+('Emerald Green Sherwani', 'men', 'Elegant silk sherwani for weddings and special occasions.', 'Compliment with mojris and a pastel safa.', ARRAY['https://picsum.photos/seed/sherwani/400/500']::text[], 500, 100, 'seller@peacock.com'),
+('Ruby Red Saree', 'women', 'Classic Banarasi silk saree with a modern twist.', 'Style with a sleek bun and emerald choker.', ARRAY['https://picsum.photos/seed/saree/400/500']::text[], 350, 75, 'seller@peacock.com'),
+('Golden Jhumkas', 'jwellery', 'Traditional temple jewellery-style earrings.', 'Let them shine with a low bun and silk saree.', ARRAY['https://picsum.photos/seed/jhumkas/400/500']::text[], 80, 20, 'seller@peacock.com'),
+('Boys Kurta Pajama Set', 'kids-boys', 'Comfortable and stylish cotton kurta set for boys.', 'Add a Nehru jacket for celebrations.', ARRAY['https://picsum.photos/seed/kurta/400/500']::text[], 120, 30, 'seller@peacock.com'),
+('Girls Anarkali Dress', 'kids-girls', 'Flowy and vibrant anarkali for young girls.', 'Pair with pearl hair clips.', ARRAY['https://picsum.photos/seed/anarkali/400/500']::text[], 150, 40, 'seller@peacock.com'),
+('Embroidered Potli Bag', 'handbags', 'A beautiful potli bag to complete your traditional look.', 'Match with gold bangles.', ARRAY['https://picsum.photos/seed/potli/400/500']::text[], 60, 15, 'seller@peacock.com'),
+('Classic Nehru Jacket', 'men', 'A versatile jacket that can be paired with any kurta.', 'Best layered over ivory kurtas.', ARRAY['https://picsum.photos/seed/nehru/400/500']::text[], 180, 45, 'seller@peacock.com'),
+('Silver Diya Set', 'pooja-items', 'Exquisite silver-plated diyas for your pooja room.', 'Set on brass thalis with fresh flowers.', ARRAY['https://picsum.photos/seed/diya/400/500']::text[], 150, 35, 'seller@peacock.com'),
+('Embroidered Mojaris', 'shoes', 'Handcrafted traditional mojaris with intricate threadwork.', 'Pair with silk dhotis or jeans alike.', ARRAY['https://picsum.photos/seed/mojari/400/500']::text[], 95, 25, 'seller@peacock.com'),
+('Kundan Necklace Set', 'jwellery', 'A stunning Kundan necklace with matching earrings.', 'Let it rest on velvet blouses.', ARRAY['https://picsum.photos/seed/kundan/400/500']::text[], 220, 55, 'seller@peacock.com'),
+('Peacock Wall Art', 'home-decor', 'Vibrant metal wall art to adorn your living space.', 'Anchor above consoles with planters.', ARRAY['https://picsum.photos/seed/wallart/400/500']::text[], 130, 40, 'seller@peacock.com');
 
 INSERT INTO reviews (product_id, author, location, text, rating) VALUES
 (1, 'Priya S.', 'New York, USA', 'The lehenga was absolutely breathtaking! I received so many compliments. The rental process was seamless.', 5),

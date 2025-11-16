@@ -69,6 +69,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, 
                                 <span className="text-gray-500 text-sm ml-2">({reviews.length} reviews)</span>
                             </div>
                             <p className="text-gray-600 mt-2">{product.description}</p>
+                            {product.stylingNotes && (
+                                <div className="mt-4 p-4 bg-peacock-emerald/10 border border-peacock-emerald/30 rounded-lg">
+                                    <p className="text-xs uppercase tracking-[0.35em] text-peacock-emerald mb-1">Dressing suggestion</p>
+                                    <p className="text-gray-700">{product.stylingNotes}</p>
+                                </div>
+                            )}
                             <div className="mt-6 space-y-3">
                                 <button
                                     onClick={() => onAddToCart(product, CartAction.Rent)}

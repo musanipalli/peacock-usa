@@ -15,6 +15,7 @@ export interface Product {
   name: string;
   category: Category;
   description: string;
+  stylingNotes?: string;
   imageUrls: string[];
   buyPrice: number;
   rentPrice: number;
