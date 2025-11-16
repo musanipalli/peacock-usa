@@ -1,23 +1,33 @@
 # This file configures the build for the FRONTEND service.
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'Build Frontend'
+- name: 'gcr.io/kaniko-project/executor:latest'
+  id: 'Build and Push Frontend'
   args:
-    - 'build'
-    - '-t'
-    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
-    - '.' # Build from the root directory
-    - '-f'
-    - 'Dockerfile.frontend' # Use the frontend-specific Dockerfile
+    - '--context=.'
+    - '--dockerfile=Dockerfile.frontend'
+    - '--destination=europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
+    - '--cache=true'
 
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'Push Frontend'
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  id: 'Deploy Frontend'
+  entrypoint: 'gcloud'
   args:
-    - 'push'
+    - 'run'
+    - 'deploy'
+    - '${_FRONTEND_SERVICE}'
+    - '--image'
     - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
+    - '--platform=managed'
+    - '--region=${_REGION}'
+    - '--allow-unauthenticated'
+    - '--project=${PROJECT_ID}'
 
 images:
   - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
+
+substitutions:
+  _REGION: europe-west1
+  _FRONTEND_SERVICE: peacock-frontend
 
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,12 @@
+to redeploy your databse
+
+  gcloud run deploy peacock-backend-service \
+  --image europe-west1-docker.pkg.dev/gen-lang-client-0907700178/peacock-backend-repo/peacock-server:latest \
+  --region=europe-west1 \
+  --allow-unauthenticated \
+  --add-cloudsql-instances gen-lang-client-0907700178:us-west1:peacock-db \
+  --set-env-vars=DB_USER=postgres,DB_PASSWORD=postgres2025,DB_NAME=peacock_store,INSTANCE_CONNECTION_NAME=gen-lang-client-0907700178:us-west1:peacock-db
+
+
+  to see the ooutput logs 
+  gcloud run services logs read peacock-backend-service --region=europe-west1 --limit=50
