@@ -7,6 +7,7 @@ interface CartProps {
     items: CartItem[];
     onRemoveItem: (productId: number, action: CartAction) => void;
     onCheckout: () => void;
+    onLoginRequest?: () => void;
 }
 
 const CartItemRow: React.FC<{ item: CartItem; onRemove: (productId: number, action: CartAction) => void }> = ({ item, onRemove }) => (
@@ -28,7 +29,7 @@ const CartItemRow: React.FC<{ item: CartItem; onRemove: (productId: number, acti
 );
 
 
-export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem, onCheckout }) => {
+export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem, onCheckout, onLoginRequest }) => {
     if (!isOpen) return null;
 
     const subtotal = items.reduce((sum, item) => {
@@ -58,12 +59,26 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem
                             <span>Subtotal</span>
                             <span>${subtotal.toFixed(2)}</span>
                         </div>
-                        <button 
-                            onClick={onCheckout}
-                            className="w-full bg-peacock-magenta text-white py-3 rounded-full hover:bg-peacock-sapphire transition-colors duration-300 font-bold"
-                        >
-                            Proceed to Checkout
-                        </button>
+                        <div className="space-y-3">
+                            <button 
+                                onClick={onCheckout}
+                                className="w-full bg-peacock-magenta text-white py-3 rounded-full hover:bg-peacock-sapphire transition-colors duration-300 font-bold"
+                            >
+                                Checkout as Guest
+                            </button>
+                            {onLoginRequest && (
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        onLoginRequest();
+                                    }}
+                                    className="w-full border border-gray-300 text-gray-700 py-3 rounded-full font-medium hover:border-peacock-magenta hover:text-peacock-magenta transition-colors duration-300"
+                                >
+                                    Sign in for faster checkout
+                                </button>
+                            )}
+                            <p className="text-xs text-gray-500 text-center">We’ll collect your email and shipping info at checkout.</p>
+                        </div>
                     </div>
                 )}
             </div>

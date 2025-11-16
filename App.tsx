@@ -319,6 +319,10 @@ const App: React.FC = () => {
                 items={cartItems}
                 onRemoveItem={handleRemoveFromCart}
                 onCheckout={handleCheckout}
+                onLoginRequest={() => {
+                    setIsCartOpen(false);
+                    setIsLoginModalOpen(true);
+                }}
             />
 
             {selectedProduct && (

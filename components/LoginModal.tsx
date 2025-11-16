@@ -76,12 +76,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         <form className="space-y-4" onSubmit={handleLogin}>
             {error && <p className="text-sm text-red-500 text-center bg-red-100 p-2 rounded-md">{error}</p>}
             <div>
-                <label className="text-sm font-medium text-gray-700">Email</label>
-                <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta" required />
+                <label className="text-sm font-medium text-gray-800">Email</label>
+                <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta text-gray-900 placeholder:text-gray-400 bg-white"
+                    required
+                />
             </div>
             <div>
-                <label className="text-sm font-medium text-gray-700">Password</label>
-                <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta" required/>
+                <label className="text-sm font-medium text-gray-800">Password</label>
+                <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta text-gray-900 placeholder:text-gray-400 bg-white"
+                    required
+                />
             </div>
             <button 
                 type="submit"
@@ -100,16 +114,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         <form className="space-y-4" onSubmit={handleSignup}>
              {error && <p className="text-sm text-red-500 text-center bg-red-100 p-2 rounded-md">{error}</p>}
             <div>
-                <label className="text-sm font-medium text-gray-700">Full Name</label>
-                <input type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta" required />
+                <label className="text-sm font-medium text-gray-800">Full Name</label>
+                <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta text-gray-900 placeholder:text-gray-400 bg-white"
+                    required
+                />
             </div>
             <div>
-                <label className="text-sm font-medium text-gray-700">Email</label>
-                <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta" required />
+                <label className="text-sm font-medium text-gray-800">Email</label>
+                <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta text-gray-900 placeholder:text-gray-400 bg-white"
+                    required
+                />
             </div>
             <div>
-                <label className="text-sm font-medium text-gray-700">Password</label>
-                <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta" required />
+                <label className="text-sm font-medium text-gray-800">Password</label>
+                <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full p-2 mt-1 border rounded-md focus:ring-peacock-magenta focus:border-peacock-magenta text-gray-900 placeholder:text-gray-400 bg-white"
+                    required
+                />
             </div>
             <button 
                 type="submit"
@@ -126,7 +161,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={handleClose}>
-            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white text-gray-900 rounded-lg shadow-xl p-8 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
                 <h2 className="text-2xl font-serif font-bold text-center mb-4 capitalize">
                      {mode === 'login' 
                         ? `${userType} Login` 
@@ -150,6 +185,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
                 </div>
                 
                 {mode === 'login' ? renderLoginForm() : renderSignupForm()}
+                <p className="text-center text-xs text-gray-500 mt-6">
+                    Just browsing?{' '}
+                    <button type="button" onClick={handleClose} className="font-medium text-peacock-magenta hover:underline">
+                        Continue as guest
+                    </button>
+                </p>
             </div>
         </div>
     );
