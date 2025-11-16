@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PeacockLogo } from './icons/PeacockLogo';
 import { GoogleGenAI } from '@google/genai';
-import featherPattern from '../assets/feather-pattern.svg';
+import featherPattern from '../assets/feather-pattern.png';
 
 const defaultTagline = 'Peacock - Love is all about sharing what we cherish!';
 const heroBackdrop = {
