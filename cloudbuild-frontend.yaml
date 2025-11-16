@@ -10,19 +10,27 @@ steps:
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
   id: 'Deploy Frontend'
-  entrypoint: 'gcloud'
+  entrypoint: 'bash'
   args:
-    - 'run'
-    - 'deploy'
-    - '${_FRONTEND_SERVICE}'
-    - '--image'
-    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}'
-    - '--platform=managed'
-    - '--region=${_REGION}'
-    - '--allow-unauthenticated'
-    - '--project=${PROJECT_ID}'
-    - '--port=80'
-    - '--quiet'
+    - '-c'
+    - |
+        set -euo pipefail
+        for attempt in 1 2 3; do
+          if gcloud run deploy "${_FRONTEND_SERVICE}" \
+            --image "europe-west1-docker.pkg.dev/${PROJECT_ID}/peacock-backend-repo/peacock-frontend:${COMMIT_SHA}" \
+            --platform=managed \
+            --region="${_REGION}" \
+            --allow-unauthenticated \
+            --project="${PROJECT_ID}" \
+            --port=80 \
+            --quiet; then
+            exit 0
+          fi
+          echo "Deploy attempt ${attempt} failed; retrying in 10s..." >&2
+          sleep 10
+        done
+        echo "Deployment failed after 3 attempts." >&2
+        exit 1
 
 substitutions:
   _REGION: europe-west1
