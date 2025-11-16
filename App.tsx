@@ -14,6 +14,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { Toast } from './components/Toast';
 import { Hero } from './components/Hero';
 import { BrandShowcase } from './components/BrandShowcase';
+import { FloatingReviewBadge } from './components/FloatingReviewBadge';
 import { Product, Review, CartItem, User, UserType, CartAction, Category, ShippingDetails } from './types';
 import { backend } from './services/backend';
 import { PRODUCTS as SAMPLE_PRODUCTS, REVIEWS as SAMPLE_REVIEWS } from './constants';
@@ -132,9 +133,8 @@ const App: React.FC = () => {
     };
 
     const handleCheckout = () => {
-        if (!user) {
-            showToast('Please log in to proceed to checkout.');
-            setIsLoginModalOpen(true);
+        if (cartItems.length === 0) {
+            showToast('Your cart is empty.');
             return;
         }
         setIsCartOpen(false);
@@ -142,11 +142,16 @@ const App: React.FC = () => {
     };
 
     const handlePaymentSuccess = async (shippingDetails: ShippingDetails) => {
-        if (!user) return;
-        if (!ensureOnline()) return;
+        const purchaserEmail = user?.email || shippingDetails.email || 'guest@peacock.com';
+        if (!ensureOnline()) {
+            showToast('Order confirmed in demo mode. Confirmation email will be sent once online.');
+            setCartItems([]);
+            setPage('home');
+            return;
+        }
         const total = cartItems.reduce((sum, item) => sum + (item.action === 'buy' ? item.product.buyPrice : item.product.rentPrice) * item.quantity, 0) * 1.08;
         try {
-            await backend.addOrder(user.email, cartItems, total, shippingDetails);
+            await backend.addOrder(purchaserEmail, cartItems, total, shippingDetails);
             setCartItems([]);
             // The success UI is in the Checkout component, which will then call onBack.
         } catch (err) {
@@ -154,19 +159,15 @@ const App: React.FC = () => {
         }
     };
 
-    const handleAddReview = async (productId: number, rating: number, text: string) => {
-        if (!user) {
-            showToast('You must be logged in to leave a review.');
-            return;
-        }
+    const handleAddReview = async (productId: number, rating: number, text: string, guestName?: string, guestLocation?: string) => {
         if (!ensureOnline()) return;
         try {
             const newReview = await backend.addReview({
                 productId,
                 rating,
                 text,
-                author: user.name,
-                location: 'Online',
+                author: user?.name || guestName || 'Guest stylist',
+                location: user?.email ? 'Verified member' : (guestLocation || 'Community'),
             });
             setReviews(prev => [...prev, newReview]);
             showToast('Thank you for your review!');
@@ -222,11 +223,23 @@ const App: React.FC = () => {
             case 'checkout':
                 return <Checkout items={cartItems} onBack={() => setPage('home')} onPaymentSuccess={handlePaymentSuccess} />;
             case 'orderHistory':
-                return user ? <OrderHistory user={user} onBack={() => setPage('home')} /> : null;
+                return user ? (
+                    <OrderHistory user={user} onBack={() => setPage('home')} />
+                ) : (
+                    renderProtectedMessage('Track bespoke orders', 'Sign in to view your curated rentals and purchases.')
+                );
             case 'profile':
-                return user && userType ? <Profile user={user} userType={userType} onUpdateProfile={handleUpdateProfile} onBack={() => setPage('home')} /> : null;
+                return user && userType ? (
+                    <Profile user={user} userType={userType} onUpdateProfile={handleUpdateProfile} onBack={() => setPage('home')} />
+                ) : (
+                    renderProtectedMessage('Personalize your atelier', 'Log in to edit preferences, addresses, and celebration reminders.')
+                );
             case 'myProducts':
-                return user ? <MyProducts user={user} allProducts={products} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={() => setPage('home')} /> : null;
+                return user ? (
+                    <MyProducts user={user} allProducts={products} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={() => setPage('home')} />
+                ) : (
+                    renderProtectedMessage('Share your wardrobe', 'Only verified hosts can upload or update couture listings.')
+                );
             case 'videoGenerator':
                 return <VideoGenerator onBack={() => setPage('home')} />;
             case 'home':
@@ -256,14 +269,21 @@ const App: React.FC = () => {
         }
     };
     
-    const isReviewAllowed = (productId: number) => {
-        // This is a simplified check. A real app would check order history.
-        // For this demo, we'll allow logged-in users to review anything.
-        return !!user;
-    };
+    const renderProtectedMessage = (title: string, description: string) => (
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-white">
+            <h2 className="text-3xl font-serif mb-4">{title}</h2>
+            <p className="text-white/70 max-w-2xl mx-auto">{description}</p>
+            <button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-peacock-magenta px-6 py-3 font-semibold text-white hover:bg-peacock-sapphire"
+            >
+                Login to continue
+            </button>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen font-sans bg-[#020202] text-white">
+        <div className="min-h-screen font-sans bg-gradient-to-br from-[#010a07] via-[#06231a] to-[#010205] text-white">
             <Header 
                 cartItemCount={cartItems.length}
                 user={user}
@@ -309,7 +329,8 @@ const App: React.FC = () => {
                     reviews={reviews.filter(r => r.productId === selectedProduct.id)}
                     onAddToCart={handleAddToCart}
                     onAddReview={handleAddReview}
-                    isReviewAllowed={isReviewAllowed(selectedProduct.id)}
+                    isReviewAllowed
+                    currentUser={user}
                 />
             )}
 
@@ -318,6 +339,8 @@ const App: React.FC = () => {
                 show={toast.show}
                 onClose={() => setToast({ show: false, message: '' })}
             />
+
+            <FloatingReviewBadge reviews={reviews} />
 
             <footer className="bg-peacock-dark text-white py-8 mt-16">
                 <div className="container mx-auto text-center text-sm">

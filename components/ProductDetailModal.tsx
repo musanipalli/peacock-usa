@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Product, CartAction, Review } from '../types';
+import { Product, CartAction, Review, User } from '../types';
 
 const StarIcon: React.FC<{ filled: boolean, className?: string, onClick?: () => void }> = ({ filled, className = 'w-5 h-5', onClick }) => (
     <svg className={`${className} ${filled ? 'text-peacock-marigold' : 'text-gray-300'} ${onClick ? 'cursor-pointer' : ''}`} fill="currentColor" viewBox="0 0 20 20" onClick={onClick}>
@@ -13,14 +13,17 @@ interface ProductDetailModalProps {
     product: Product;
     reviews: Review[];
     onAddToCart: (product: Product, action: CartAction) => void;
-    onAddReview: (productId: number, rating: number, text: string) => void;
+    onAddReview: (productId: number, rating: number, text: string, guestName?: string, guestLocation?: string) => void;
     isReviewAllowed: boolean;
+    currentUser: User | null;
 }
 
-export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose, product, reviews, onAddToCart, onAddReview, isReviewAllowed }) => {
+export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, onClose, product, reviews, onAddToCart, onAddReview, isReviewAllowed, currentUser }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [newReviewRating, setNewReviewRating] = useState(0);
     const [newReviewText, setNewReviewText] = useState('');
+    const [guestName, setGuestName] = useState('');
+    const [guestLocation, setGuestLocation] = useState('');
 
     if (!isOpen) return null;
 
@@ -29,9 +32,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, 
     const handleReviewSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (newReviewRating > 0 && newReviewText.trim()) {
-            onAddReview(product.id, newReviewRating, newReviewText);
+            onAddReview(product.id, newReviewRating, newReviewText, guestName, guestLocation);
             setNewReviewRating(0);
             setNewReviewText('');
+            setGuestName('');
+            setGuestLocation('');
         }
     };
 
@@ -89,6 +94,26 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ isOpen, 
                         {isReviewAllowed && (
                              <form onSubmit={handleReviewSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg">
                                 <h4 className="font-semibold mb-2">Leave a Review</h4>
+                                {!currentUser && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                        <input
+                                            value={guestName}
+                                            onChange={(e) => setGuestName(e.target.value)}
+                                            className="p-2 border rounded-md"
+                                            placeholder="Your Name"
+                                            required={!currentUser}
+                                        />
+                                        <input
+                                            value={guestLocation}
+                                            onChange={(e) => setGuestLocation(e.target.value)}
+                                            className="p-2 border rounded-md"
+                                            placeholder="City / Country"
+                                        />
+                                    </div>
+                                )}
+                                {currentUser && (
+                                    <p className="text-sm text-gray-500 mb-2">Posting as {currentUser.name}</p>
+                                )}
                                 <div className="flex items-center mb-2">
                                     {[...Array(5)].map((_, i) => <StarIcon key={i} filled={i < newReviewRating} className="w-6 h-6" onClick={() => setNewReviewRating(i + 1)} />)}
                                 </div>

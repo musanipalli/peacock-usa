@@ -15,7 +15,13 @@ type PaymentMethod = 'creditcard' | 'paypal';
 export const Checkout: React.FC<CheckoutProps> = ({ items, onBack, onPaymentSuccess }) => {
     const [step, setStep] = useState<CheckoutStep>('shipping');
     const [shippingDetails, setShippingDetails] = useState<ShippingDetails>({
-        fullName: '', address: '', city: '', state: '', zipCode: '', country: 'USA'
+        fullName: '',
+        email: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'USA'
     });
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('creditcard');
@@ -86,9 +92,11 @@ export const Checkout: React.FC<CheckoutProps> = ({ items, onBack, onPaymentSucc
 
     const renderShipping = () => (
         <form onSubmit={handleShippingSubmit}>
-            <h2 className="text-2xl font-bold font-serif mb-6">Shipping Information</h2>
+            <h2 className="text-2xl font-bold font-serif mb-2">Shipping Information</h2>
+            <p className="text-sm text-gray-500 mb-6">Guest checkout is enabled&mdash;share a contact email so we can send confirmation details.</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                  <input name="fullName" value={shippingDetails.fullName} onChange={handleInputChange} className="p-2 border rounded-md" placeholder="Full Name" required />
+                 <input type="email" name="email" value={shippingDetails.email ?? ''} onChange={handleInputChange} className="p-2 border rounded-md" placeholder="Email Address" required />
                  <input name="address" value={shippingDetails.address} onChange={handleInputChange} className="p-2 border rounded-md sm:col-span-2" placeholder="Address" required />
                  <input name="city" value={shippingDetails.city} onChange={handleInputChange} className="p-2 border rounded-md" placeholder="City" required />
                  <input name="state" value={shippingDetails.state} onChange={handleInputChange} className="p-2 border rounded-md" placeholder="State / Province" required />

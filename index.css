@@ -7,8 +7,8 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  background: radial-gradient(circle at top, #f7f5ec 0%, #fefdf8 35%, #f8f4ee 70%, #f3efe9 100%);
-  color: #0F172A;
+  background: radial-gradient(circle at 20% 20%, #0d291c 0%, #04130f 45%, #010507 100%);
+  color: #f8f5ee;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

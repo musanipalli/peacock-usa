@@ -43,6 +43,7 @@ export interface CartItem {
 
 export interface ShippingDetails {
   fullName: string;
+  email?: string;
   address: string;
   city: string;
   state: string;

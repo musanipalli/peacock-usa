@@ -97,7 +97,13 @@ export const Header: React.FC<HeaderProps> = ({
                             <DropdownLink onClick={() => onSelectCategory(Category.PoojaItems)}>Pooja</DropdownLink>
                         </Dropdown>
                         <NavLink onClick={onVideoGeneratorClick}>Video Atelier</NavLink>
-                        <NavLink>Stories</NavLink>
+                        <NavLink href="#about">About</NavLink>
+                        <NavLink href="#community">Community</NavLink>
+                        <Dropdown title="Experience">
+                            <DropdownLink onClick={onOrderHistoryClick}>Orders</DropdownLink>
+                            <DropdownLink onClick={onProfileClick}>Profile</DropdownLink>
+                            <DropdownLink onClick={onMyProductsClick}>Sell / Rent</DropdownLink>
+                        </Dropdown>
                     </nav>
                     <div className="flex items-center gap-3">
                         <button className="rounded-full border border-white/10 p-2 text-white/70 hover:border-white/50 hover:text-white transition">
