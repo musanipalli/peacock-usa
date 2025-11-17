@@ -14,3 +14,12 @@ to redeploy your databse
   Customer: Priya Sharma — priya@example.com / peacock123
 Customer: Rohan Patel — rohan@example.com / peacock123
 Seller: Anita Rao — anita@example.com / peacock123
+
+
+to connect and seed to the databse
+make sure you clone the latest gitversion of the code
+
+git clone "https://github.com/musanipalli/peacock-usa.git"
+cd peacock-usa/backend
+  psql "host=127.0.0.1 port=5432 user=postgres dbname=peacock_store password=password2025"
+\i backend/seed.sql

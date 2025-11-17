@@ -317,6 +317,44 @@ apiRouter.get('/products', async (req, res) => {
     }
 });
 
+apiRouter.get('/categories', async (req, res) => {
+    try {
+        if (!pool) {
+            return res.json(catalogCategories);
+        }
+        const result = await pool.query('SELECT slug, label FROM categories ORDER BY label');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Get Categories Error:', err);
+        res.status(500).send('Failed to fetch categories');
+    }
+});
+
+apiRouter.get('/categories/:slug/products', async (req, res) => {
+    const { slug } = req.params;
+    try {
+        if (!pool) {
+            return res.json(mockProducts.filter(p => p.category === slug));
+        }
+        const result = await pool.query('SELECT * FROM products WHERE category = $1 ORDER BY id', [slug]);
+        const products = result.rows.map(p => ({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            description: p.description,
+            stylingNotes: p.styling_notes,
+            imageUrls: p.image_urls,
+            buyPrice: parseFloat(p.buy_price),
+            rentPrice: parseFloat(p.rent_price),
+            sellerEmail: p.seller_email
+        }));
+        res.json(products);
+    } catch (err) {
+        console.error('Get Category Products Error:', err);
+        res.status(500).send('Failed to fetch category products');
+    }
+});
+
 apiRouter.post('/products', async (req, res) => {
     const { name, category, description, stylingNotes, imageUrls, buyPrice, rentPrice, sellerEmail } = req.body;
     try {

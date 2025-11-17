@@ -15,9 +15,26 @@ import { Toast } from './components/Toast';
 import { Hero } from './components/Hero';
 import { BrandShowcase } from './components/BrandShowcase';
 import { FloatingReviewBadge } from './components/FloatingReviewBadge';
-import { Product, Review, CartItem, User, UserType, CartAction, Category, ShippingDetails } from './types';
+import { Product, Review, CartItem, User, UserType, CartAction, Category, ShippingDetails, CatalogCategory } from './types';
 import { backend } from './services/backend';
 import { PRODUCTS as SAMPLE_PRODUCTS, REVIEWS as SAMPLE_REVIEWS } from './constants';
+
+const CATEGORY_LABELS: Record<Category, string> = {
+    [Category.Women]: 'Women',
+    [Category.Men]: 'Men',
+    [Category.KidsBoys]: 'Kids - Boys',
+    [Category.KidsGirls]: 'Kids - Girls',
+    [Category.Handbags]: 'Handbags',
+    [Category.Shoes]: 'Shoes',
+    [Category.Jwellery]: 'Jewellery',
+    [Category.PoojaItems]: 'Pooja Items',
+    [Category.HomeDecor]: 'Home Decor',
+};
+
+const DEFAULT_CATEGORIES: CatalogCategory[] = Object.entries(CATEGORY_LABELS).map(([slug, label]) => ({
+    slug: slug as Category,
+    label,
+}));
 
 type Page = 'home' | 'checkout' | 'orderHistory' | 'profile' | 'myProducts' | 'videoGenerator';
 
@@ -42,6 +59,9 @@ const App: React.FC = () => {
     const [toast, setToast] = useState({ show: false, message: '' });
     const [isOfflineMode, setIsOfflineMode] = useState(false);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
+    const [categories, setCategories] = useState<CatalogCategory[]>(DEFAULT_CATEGORIES);
+    const [categoryProducts, setCategoryProducts] = useState<Record<string, Product[]>>({});
+    const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 
     const showToast = useCallback((message: string) => {
         setToast({ show: true, message });
@@ -50,6 +70,7 @@ const App: React.FC = () => {
     const loadSampleData = useCallback(() => {
         setProducts(SAMPLE_PRODUCTS);
         setReviews(SAMPLE_REVIEWS);
+        setCategories(DEFAULT_CATEGORIES);
     }, []);
 
     const ensureOnline = useCallback(() => {
@@ -64,12 +85,14 @@ const App: React.FC = () => {
             setIsLoading(true);
             setIsOfflineMode(false);
             setConnectionWarning(null);
-            const [productsData, reviewsData] = await Promise.all([
+            const [productsData, reviewsData, categoryData] = await Promise.all([
                 backend.getProducts(),
-                backend.getReviews()
+                backend.getReviews(),
+                backend.getCategories()
             ]);
             setProducts(productsData);
             setReviews(reviewsData);
+            setCategories(categoryData);
         } catch (err: any) {
             const warningMessage = 'Unable to reach the backend. Showing sample catalog data instead.';
             loadSampleData();
@@ -97,7 +120,7 @@ const App: React.FC = () => {
     const handleLogout = () => {
         setUser(null);
         setUserType(null);
-        setPage('home');
+        handleGoHome();
         showToast('You have been logged out.');
     };
     
@@ -217,7 +240,42 @@ const App: React.FC = () => {
         }
     };
 
-    const filteredProducts = selectedCategory ? products.filter(p => p.category === selectedCategory) : products;
+    const filteredProducts = selectedCategory && page === 'home' ? products.filter(p => p.category === selectedCategory) : products;
+
+    const handleGoHome = () => {
+        setPage('home');
+        setSelectedCategory(null);
+    };
+
+    const navigateToCategory = (category: Category) => {
+        setSelectedCategory(category);
+        setPage('category');
+    };
+
+    useEffect(() => {
+        if (page !== 'category' || !selectedCategory) return;
+        if (categoryProducts[selectedCategory]) return;
+
+        const loadCategoryProducts = async () => {
+            setIsCategoryLoading(true);
+            try {
+                if (isOfflineMode) {
+                    const offlineProducts = SAMPLE_PRODUCTS.filter(p => p.category === selectedCategory);
+                    setCategoryProducts(prev => ({ ...prev, [selectedCategory]: offlineProducts }));
+                } else {
+                    const data = await backend.getProductsByCategory(selectedCategory);
+                    setCategoryProducts(prev => ({ ...prev, [selectedCategory]: data }));
+                }
+            } catch (err) {
+                console.error('Category load error', err);
+                showToast('Unable to load this collection right now.');
+            } finally {
+                setIsCategoryLoading(false);
+            }
+        };
+
+        loadCategoryProducts();
+    }, [page, selectedCategory, isOfflineMode, showToast, categoryProducts]);
 
     // Render logic
     const renderPage = () => {
@@ -240,12 +298,82 @@ const App: React.FC = () => {
                 );
             case 'myProducts':
                 return user ? (
-                    <MyProducts user={user} allProducts={products} reviews={reviews} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={() => setPage('home')} />
+                    <MyProducts user={user} allProducts={products} reviews={reviews} onAdd={handleAddProduct} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} onBack={handleGoHome} />
                 ) : (
                     renderProtectedMessage('Share your wardrobe', 'Only verified hosts can upload or update couture listings.')
                 );
             case 'videoGenerator':
                 return <VideoGenerator onBack={() => setPage('home')} />;
+            case 'stories':
+                return (
+                    <section className="py-16 container mx-auto px-4 sm:px-6 lg:px-8 text-white">
+                        <div className="max-w-3xl mx-auto text-center mb-10">
+                            <p className="text-xs uppercase tracking-[0.5em] text-peacock-emerald">Stories</p>
+                            <h2 className="text-3xl font-serif mt-3">Culture diaries &amp; community drops</h2>
+                            <p className="text-white/70 mt-3">
+                                Follow how each catalog comes to life&mdash;from atelier sketchbooks to diaspora stylings.
+                            </p>
+                        </div>
+                        <div className="grid gap-6 md:grid-cols-3">
+                            {categories.map(category => (
+                                <article key={category.slug} className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.35em] text-peacock-magenta">{category.label}</p>
+                                        <h3 className="text-xl font-serif mt-3">{category.label} capsule</h3>
+                                        <p className="text-white/70 text-sm mt-3">
+                                            Interviews, care guides, and favorite looks curated from the {category.label.toLowerCase()} table.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => navigateToCategory(category.slug)}
+                                        className="mt-6 inline-flex items-center text-peacock-gold-light font-semibold hover:text-peacock-magenta"
+                                    >
+                                        Browse collection
+                                        <svg className="h-4 w-4 ml-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                );
+            case 'category':
+                if (!selectedCategory) {
+                    return renderProtectedMessage('Select a collection', 'Choose a catalog from the navigation.');
+                }
+                const categoryLabel = categories.find(c => c.slug === selectedCategory)?.label || CATEGORY_LABELS[selectedCategory];
+                const categoryData = categoryProducts[selectedCategory] || [];
+                return (
+                    <section className="py-12 container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.5em] text-peacock-emerald">Collection</p>
+                                <h2 className="text-3xl font-serif text-white mt-2">{categoryLabel}</h2>
+                                <p className="text-white/70 mt-2">Pieces curated from the {categoryLabel} table in the catalog.</p>
+                            </div>
+                            <button onClick={() => handleGoHome()} className="text-sm text-white/70 hover:text-white underline">
+                                &larr; Back to all products
+                            </button>
+                        </div>
+                        {isCategoryLoading ? (
+                            <div className="flex justify-center items-center h-64"><LoadingSpinner /></div>
+                        ) : categoryData.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                                {categoryData.map(product => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        onQuickView={setSelectedProduct}
+                                        onAddToCart={handleAddToCart}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center text-white/70 py-20">No products found for this collection yet.</div>
+                        )}
+                    </section>
+                );
             case 'home':
             default:
                 return (
@@ -299,8 +427,9 @@ const App: React.FC = () => {
                 onProfileClick={() => setPage('profile')}
                 onMyProductsClick={() => setPage('myProducts')}
                 onVideoGeneratorClick={() => setPage('videoGenerator')}
-                onGoHome={() => { setPage('home'); setSelectedCategory(null); }}
-                onSelectCategory={(cat) => { setPage('home'); setSelectedCategory(cat); }}
+                onGoHome={handleGoHome}
+                onSelectCategory={navigateToCategory}
+                onStoriesClick={() => setPage('stories')}
             />
 
             {connectionWarning && (

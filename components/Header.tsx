@@ -14,6 +14,7 @@ interface HeaderProps {
     onMyProductsClick: () => void;
     onSelectCategory: (category: Category) => void;
     onGoHome: () => void;
+    onStoriesClick: () => void;
     user: User | null;
     userType: UserType | null;
     onLogout: () => void;
@@ -66,6 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
     onVideoGeneratorClick,
     onSelectCategory,
     onGoHome,
+    onStoriesClick,
 }) => {
     return (
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#020202]/85 backdrop-blur-xl text-white">
@@ -104,6 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
                             <DropdownLink onClick={onProfileClick}>Profile</DropdownLink>
                             <DropdownLink onClick={onMyProductsClick}>Sell / Rent</DropdownLink>
                         </Dropdown>
+                        <NavLink onClick={onStoriesClick}>Stories</NavLink>
                     </nav>
                     <div className="flex items-center gap-3">
                         <button className="rounded-full border border-white/10 p-2 text-white/70 hover:border-white/50 hover:text-white transition">

@@ -1,4 +1,4 @@
-import { Product, Review, User, UserType, Order, ShippingDetails, CartItem } from '../types';
+import { Product, Review, User, UserType, Order, ShippingDetails, CartItem, CatalogCategory, Category } from '../types';
 
 const sanitizeUrl = (url: string) => {
     if (!url) return url;
@@ -92,6 +92,14 @@ class BackendService {
     // --- Product Management ---
     async getProducts(): Promise<Product[]> {
         return api.get<Product[]>('/products');
+    }
+    
+    async getCategories(): Promise<CatalogCategory[]> {
+        return api.get<CatalogCategory[]>('/categories');
+    }
+
+    async getProductsByCategory(category: Category): Promise<Product[]> {
+        return api.get<Product[]>(`/categories/${encodeURIComponent(category)}/products`);
     }
 
     async addProduct(productData: Omit<Product, 'id'>): Promise<Product> {

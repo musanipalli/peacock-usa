@@ -22,6 +22,11 @@ export interface Product {
   sellerEmail?: string; // Link product to a seller
 }
 
+export interface CatalogCategory {
+  slug: Category;
+  label: string;
+}
+
 export interface Review {
   id: number;
   productId: number; // Link review to a product
