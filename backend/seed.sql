@@ -4,10 +4,11 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     phone_number VARCHAR(50),
-    user_type VARCHAR(50) NOT NULL
+    user_type VARCHAR(50) NOT NULL,
+    CONSTRAINT users_email_user_type_key UNIQUE (email, user_type)
 );
 
 CREATE TABLE IF NOT EXISTS products (
