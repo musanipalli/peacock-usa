@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PeacockLogo } from './icons/PeacockLogo';
 import { CartIcon } from './icons/CartIcon';
 import { SearchIcon } from './icons/SearchIcon';
@@ -69,6 +69,24 @@ export const Header: React.FC<HeaderProps> = ({
     onGoHome,
     onStoriesClick,
 }) => {
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const userMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const withUserMenuClose = (action: () => void) => () => {
+        setIsUserMenuOpen(false);
+        action();
+    };
+
     return (
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#020202]/85 backdrop-blur-xl text-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-10">
@@ -121,18 +139,21 @@ export const Header: React.FC<HeaderProps> = ({
                             )}
                         </button>
                         {user ? (
-                            <div className="relative group">
-                                <button className="flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10">
+                            <div className="relative" ref={userMenuRef}>
+                                <button
+                                    className="flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
+                                    onClick={() => setIsUserMenuOpen(prev => !prev)}
+                                >
                                     <span className="text-white/80">Hi, {user.name.split(' ')[0]}</span>
-                                    <ChevronDownIcon className="h-3 w-3" />
+                                    <ChevronDownIcon className={`h-3 w-3 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
-                                <div className="invisible absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/10 bg-[#0f0f0f] p-2 text-white/80 opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
-                                    <DropdownLink onClick={onProfileClick}>My Profile</DropdownLink>
-                                    <DropdownLink onClick={onOrderHistoryClick}>Order History</DropdownLink>
+                                <div className={`${isUserMenuOpen ? 'visible opacity-100' : 'invisible opacity-0'} absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/10 bg-[#0f0f0f] p-2 text-white/80 shadow-2xl transition`}>
+                                    <DropdownLink onClick={withUserMenuClose(onProfileClick)}>My Profile</DropdownLink>
+                                    <DropdownLink onClick={withUserMenuClose(onOrderHistoryClick)}>Order History</DropdownLink>
                                     {userType === 'seller' && (
-                                        <DropdownLink onClick={onMyProductsClick}>My Products</DropdownLink>
+                                        <DropdownLink onClick={withUserMenuClose(onMyProductsClick)}>My Products</DropdownLink>
                                     )}
-                                    <DropdownLink onClick={onLogout}>Logout</DropdownLink>
+                                    <DropdownLink onClick={withUserMenuClose(onLogout)}>Logout</DropdownLink>
                                 </div>
                             </div>
                         ) : (

@@ -85,14 +85,24 @@ const App: React.FC = () => {
             setIsLoading(true);
             setIsOfflineMode(false);
             setConnectionWarning(null);
-            const [productsData, reviewsData, categoryData] = await Promise.all([
+            const [productsData, reviewsData] = await Promise.all([
                 backend.getProducts(),
                 backend.getReviews(),
-                backend.getCategories()
             ]);
             setProducts(productsData);
             setReviews(reviewsData);
-            setCategories(categoryData);
+
+            try {
+                const categoryData = await backend.getCategories();
+                if (Array.isArray(categoryData) && categoryData.length > 0) {
+                    setCategories(categoryData);
+                } else {
+                    setCategories(DEFAULT_CATEGORIES);
+                }
+            } catch (categoryErr) {
+                console.warn('Unable to fetch categories, falling back to defaults.', categoryErr);
+                setCategories(DEFAULT_CATEGORIES);
+            }
         } catch (err: any) {
             const warningMessage = 'Unable to reach the backend. Showing sample catalog data instead.';
             loadSampleData();
@@ -268,14 +278,20 @@ const App: React.FC = () => {
                 }
             } catch (err) {
                 console.error('Category load error', err);
-                showToast('Unable to load this collection right now.');
+                const fallbackProducts = (isOfflineMode ? SAMPLE_PRODUCTS : products).filter(p => p.category === selectedCategory);
+                if (fallbackProducts.length > 0) {
+                    setCategoryProducts(prev => ({ ...prev, [selectedCategory]: fallbackProducts }));
+                    showToast('Showing cached catalog for this collection.');
+                } else {
+                    showToast('Unable to load this collection right now.');
+                }
             } finally {
                 setIsCategoryLoading(false);
             }
         };
 
         loadCategoryProducts();
-    }, [page, selectedCategory, isOfflineMode, showToast, categoryProducts]);
+    }, [page, selectedCategory, isOfflineMode, showToast, categoryProducts, products]);
 
     // Render logic
     const renderPage = () => {
